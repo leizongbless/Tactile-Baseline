@@ -188,7 +188,7 @@ if __name__ == "__main__":
         }
     }
     obs_encoder = PointNetObsEncoder(shape_meta, output_dim=1024)
-    obs_dict = {'point_cloud': point_cloud}
+    obs_dict = {'global_pts': point_cloud}
     output = obs_encoder(obs_dict)
     print(f"Input shape: {point_cloud.shape}")
     print(f"Output shape: {output.shape}")
@@ -197,7 +197,7 @@ if __name__ == "__main__":
     # Test with temporal dimension
     print("\nTesting with temporal dimension...")
     point_cloud_temporal = torch.randn(batch_size, 2, n_points, 3)  # (B, T, N, 3)
-    obs_dict_temporal = {'point_cloud': point_cloud_temporal}
+    obs_dict_temporal = {'global_pts': point_cloud_temporal}
     output_temporal = obs_encoder(obs_dict_temporal)
     print(f"Input shape: {point_cloud_temporal.shape}")
     print(f"Output shape: {output_temporal.shape}")

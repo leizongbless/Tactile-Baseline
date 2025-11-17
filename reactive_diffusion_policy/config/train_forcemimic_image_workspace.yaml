@@ -142,7 +142,7 @@ ema:
 
 dataloader:
   # ResNet
-  batch_size: 2
+  batch_size: 32  # Reduced from 64 to 16 to fit in GPU memory
   # timm
   # batch_size: 32
   num_workers: 8
@@ -152,7 +152,7 @@ dataloader:
 
 val_dataloader:
   # ResNet
-  batch_size: 2
+  batch_size: 32  # Reduced from 64 to 16 to fit in GPU memory
   # timm
   # batch_size: 32
   num_workers: 8
