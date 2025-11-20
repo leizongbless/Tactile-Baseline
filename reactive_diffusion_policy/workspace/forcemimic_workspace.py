@@ -332,8 +332,8 @@ class TrainDiffusionUnetImageWorkspace(BaseWorkspace):
                         pred_action = result['action_pred']
 
                         # Debug: print shapes
-                        print(f"[DEBUG] Sampling - gt_action.shape: {gt_action.shape}")
-                        print(f"[DEBUG] Sampling - pred_action.shape: {pred_action.shape}")
+                        # print(f"[DEBUG] Sampling - gt_action.shape: {gt_action.shape}")
+                        # print(f"[DEBUG] Sampling - pred_action.shape: {pred_action.shape}")
 
                         # Extract only robot action dimensions for comparison (first 10 dims)
                         # gt_action is 25-dim (10 robot + 15 tactile), pred_action should be 10-dim robot only
@@ -344,8 +344,8 @@ class TrainDiffusionUnetImageWorkspace(BaseWorkspace):
                         else:
                             pred_action_robot = pred_action
                         
-                        print(f"[DEBUG] Sampling - gt_action_robot.shape: {gt_action_robot.shape}")
-                        print(f"[DEBUG] Sampling - pred_action_robot.shape: {pred_action_robot.shape}")
+                        # print(f"[DEBUG] Sampling - gt_action_robot.shape: {gt_action_robot.shape}")
+                        # print(f"[DEBUG] Sampling - pred_action_robot.shape: {pred_action_robot.shape}")
                         
                         all_preds, all_gt = accelerator.gather_for_metrics((pred_action_robot, gt_action_robot))
 

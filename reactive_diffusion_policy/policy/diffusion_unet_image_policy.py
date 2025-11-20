@@ -200,8 +200,9 @@ class DiffusionUnetImagePolicy(BaseImagePolicy):
         else:
             self._debug_count = 0
         if self._debug_count == 0:
-            print(f"[DEBUG] compute_loss: batch['action'].shape = {batch['action'].shape}")
-            print(f"[DEBUG] compute_loss: action has NaN = {torch.isnan(batch['action']).any()}")
+            pass
+            # print(f"[DEBUG] compute_loss: batch['action'].shape = {batch['action'].shape}")
+            # print(f"[DEBUG] compute_loss: action has NaN = {torch.isnan(batch['action']).any()}")
         
         nactions = self.normalizer['action'].normalize(batch['action'])
         batch_size = nactions.shape[0]
