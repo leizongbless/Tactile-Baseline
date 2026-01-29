@@ -49,7 +49,9 @@ class EncoderCNN(nn.Module):
                     input_dim,
                     output_dim=16,
                     hidden_dim=128,
-                    layer_num=1):
+                    layer_num=1,
+                    not_downsample=False
+                    ):
         super(EncoderCNN, self).__init__()
 
         self.action_dim = input_dim
@@ -61,7 +63,15 @@ class EncoderCNN(nn.Module):
             else:
                 layers.append(nn.Conv1d(hidden_dim, hidden_dim, kernel_size=5, stride=2, padding=2))
             layers.append(nn.ReLU())
-        layers.append(nn.Conv1d(hidden_dim, output_dim, kernel_size=5, stride=2, padding=2))
+        if layer_num > 0:
+            layers.append(nn.Conv1d(hidden_dim, output_dim, kernel_size=5, stride=2, padding=2))
+        else:
+            if layer_num == 0:
+                layers.append(nn.Conv1d(input_dim, output_dim, kernel_size=5, stride=2, padding=2))
+            elif layer_num == -1:
+                layers.append(nn.Conv1d(input_dim, output_dim, kernel_size=5, stride=1, padding=2))
+            else:
+                raise NotImplementedError()
 
         self.encoder = nn.Sequential(*layers)
         self.apply(weights_init_encoder)
@@ -154,6 +164,7 @@ class VAE:
         else:
             decoder_n_latent_dims = np.multiply(*output_shape)
             self.downsampled_input_h = output_shape[0]
+        print(f"downsampled_input_h is {self.downsampled_input_h}")
 
         if self.use_rnn_decoder:
             self.decoder = DecoderRNN(global_cond_dim=decoder_n_latent_dims, temporal_cond_dim=self.rnn_temporal_cond_dim,
@@ -339,7 +350,8 @@ class VAE:
 
         state_rep = self.encoder(state)
         if self.use_vq:
-            raise NotImplementedError()
+            # raise NotImplementedError()
+            state_vq, _, _ = self.quant_state_with_vq(state_rep)
         else:
             state_vq, posterior = self.quant_state_without_vq(state_rep)
         state_vq = einops.rearrange(state_vq, 'N (T A) -> N T A', T=self.downsampled_input_h)
@@ -353,7 +365,8 @@ class VAE:
         N,compress_T,A = action.shape
         action = einops.rearrange(action, 'N T A -> N (T A)')
         if self.use_vq:
-            raise NotImplementedError()
+            # raise NotImplementedError()
+            state_vq = action
         else:
             state_vq = self.postprocess_quant_state_without_vq(action)
         
