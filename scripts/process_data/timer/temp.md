@@ -1,3 +1,30 @@
+代码报错了
+“
+(rdp) tars@tars-LEGION-REN9000K-34IAS:~/projects/visual_tactile_policy/kywang/Tactile-Baseline$ bash scripts/process_data/timer/process_data_60hz.sh
+save_camera_vis: True save_tactile_vis: False save_action_vis: False episode_length: 2 target_fps: 60 start_z_diff_thresh: 1.0 end_extra_frames: 3
+  0%|                                                                                                                                                      | 0/2 [00:00<?, ?it/s]loading episode: /home/tars/projects/force_data/jishiqi_0316_60/0000
+Error loading data: /home/tars/projects/force_data/jishiqi_0316_60/0000
+Exception: index 0 is out of bounds for axis 0 with size 0
+ 50%|███████████████████████████████████████████████████████████████████████                                                                       | 1/2 [00:00<00:00,  2.85it/s]loading episode: /home/tars/projects/force_data/jishiqi_0316_60/0001
+Error loading data: /home/tars/projects/force_data/jishiqi_0316_60/0001
+Exception: index 0 is out of bounds for axis 0 with size 0
+100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:00<00:00,  3.98it/s]
+Traceback (most recent call last):
+  File "/home/tars/projects/visual_tactile_policy/kywang/Tactile-Baseline/scripts/process_data/timer/process_data_all_zarr_any_frequency.py", line 663, in <module>
+    left_robot_tcp_pose_arrays = np.concatenate(left_robot_tcp_pose_list)
+ValueError: need at least one array to concatenate
+”
+我猜测可能是因为数据存在损坏，请分析这个报错，并且给我一个check完整性的脚本，数据的结构大概如下
+“
+(rdp) tars@tars-LEGION-REN9000K-34IAS:~/projects/force_data/jishiqi_0316_60/0000$ ls
+force.pkl    image.pkl  tac_force.pkl  tactile_raw.pkl
+gripper.pkl  state.pkl  tactile.pkl
+”
+
+
+
+ok，脚本我调通了，现在需要你增加一个功能，开启save_camera_vis时，还要输出视频，而不只是图片，这样我更方便检查
+“
 """
 统一参数化版本（支持 15Hz / 30Hz / 60Hz）
 并删除 depth 相关逻辑：
@@ -775,4 +802,4 @@ if __name__ == '__main__':
                 pickle.dump(sample, f)
             print(f'create testing samples: {i + 1} / {len(test_data)}')
 
-        print('end')
+        print('end')”

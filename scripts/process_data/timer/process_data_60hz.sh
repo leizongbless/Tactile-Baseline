@@ -3,11 +3,11 @@ python scripts/process_data/timer/process_data_all_zarr_any_frequency.py \
     --root_path /home/tars/projects/force_data \
     --save_path /home/tars/projects/visual_tactile_policy/kywang/processed_timer/processed_60hz \
     --task_list jishiqi_0316_60 \
-    --episode_length 2 \
+    --episode_length 60 \
     --target_fps 60 \
-    --start_z_diff_thresh 1.0 \
+    --start_z_diff_thresh 0.25 \
     --end_extra_frames 3 \
-    --save_camera_vis \
+    # --save_camera_vis \
     # --episode_length 2
 
 # /home/tars/projects/force_data/jishiqi_0316_60
