@@ -2,7 +2,10 @@
 
 # ================== 配置区域 ==================
 
-PROJ_MAIN_DIR="/home/tars/projects/visual_tactile_policy/Tactile-Baseline/inference_node"
+# 获取脚本自身所在目录，而不是依赖执行时的 pwd
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJ_MAIN_DIR="${SCRIPT_DIR}/inference_node"
+# PROJ_MAIN_DIR="/home/tars/projects/visual_tactile_policy/kywang/Tactile-Baseline/inference_node"
 XARM_CMD="python ./gello_trajectory_pub_node.py"
 CAMERA_CMD="python ./camera_pub_node.py"
 TACTILE_CMD="python ./xense_pub_node.py"
