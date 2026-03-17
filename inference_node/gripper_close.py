@@ -21,4 +21,5 @@ gripper = gripper.RobotiqGripper()
 # gripper.move(position=220, speed=255, force=1) # with tactile
 
 ### timer
-gripper.move(position=200, speed=255, force=1) # 问问磊哥参数
+# gripper.move(position=200, speed=255, force=1) # 问问磊哥参数
+gripper.move(position=220, speed=255, force=100)
