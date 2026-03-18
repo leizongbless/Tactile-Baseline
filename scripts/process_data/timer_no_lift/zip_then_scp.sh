@@ -1,0 +1,2 @@
+zip -r /home/tars/projects/force_data/jishiqi_0316_60.zip /home/tars/projects/force_data/jishiqi_0316_60
+scp -P 1030 /home/tars/projects/force_data/jishiqi_0316_60.zip root@8.130.212.67:/mnt/data/kywang/visual_tactile/dataset/
