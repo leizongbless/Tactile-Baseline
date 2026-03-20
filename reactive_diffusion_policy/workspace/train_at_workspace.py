@@ -124,7 +124,7 @@ class TrainATWorkspace(BaseWorkspace):
         # training loop
         log_path = os.path.join(self.output_dir, 'logs.json.txt')
         with JsonLogger(log_path) as json_logger:
-            for local_epoch_idx in range(cfg.training.num_epochs):
+            for local_epoch_idx in tqdm.tqdm(range(cfg.training.num_epochs)):
                 step_log = dict()
                 # ========= train for this epoch ==========
                 train_losses = list()
