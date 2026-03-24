@@ -58,4 +58,9 @@ if __name__ == '__main__':
     arm.set_servo_angle(angle=angle, speed=speed, is_radian=True, wait=True)
     time.sleep(1)
 
+    ### 地鼠
+    # angle = [1.523113, -0.23686, -0.031949, 1.115768, 0.043972, 1.226282, -1.700487] #地鼠
+    # arm.set_servo_angle(angle=angle, speed=speed, is_radian=True, wait=True)
+    # time.sleep(1)
+
     arm.disconnect()
