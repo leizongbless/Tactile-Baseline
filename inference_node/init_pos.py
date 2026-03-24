@@ -49,7 +49,12 @@ if __name__ == '__main__':
     # time.sleep(1)
 
     ### timer
-    angle = [1.522664, -0.219693, -0.454553, 1.258073, -0.079435, 1.363711, -2.040055] #计时器
+    # angle = [1.522664, -0.219693, -0.454553, 1.258073, -0.079435, 1.363711, -2.040055] #计时器
+    # arm.set_servo_angle(angle=angle, speed=speed, is_radian=True, wait=True)
+    # time.sleep(1)
+
+    ### timer_no_lift_higher
+    angle = [1.522119, -0.167026, -0.396674, 1.503997, -0.088486, 1.546412, -1.959906] #计时器 版本二
     arm.set_servo_angle(angle=angle, speed=speed, is_radian=True, wait=True)
     time.sleep(1)
 
