@@ -277,6 +277,12 @@ def get_action_normalizer(actions: np.ndarray, temporally_independent_normalizat
         normalizers.append(get_identity_normalizer_from_stat(array_to_stats(actions[...,3:9])))
         if D == 10:
             normalizers.append(get_range_normalizer_from_stat(array_to_stats(actions[...,9:])))
+    elif D == 7: # (x, y, z, rx1, rx2, rx3, ry1, ry2, ry3)
+        normalizers = []
+        normalizers.append(get_range_normalizer_from_stat(array_to_stats(actions[...,:3])))
+        # don't normalize rotation
+        normalizers.append(get_identity_normalizer_from_stat(array_to_stats(actions[...,3:6])))
+        normalizers.append(get_range_normalizer_from_stat(array_to_stats(actions[...,6:])))
     elif D == 25:
         # For kinedex: 25-dim action (10 robot + 15 tactile)
         # Robot action (10-dim): xyz (3) + 6d rotation (6) + gripper (1)
