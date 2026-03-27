@@ -79,7 +79,8 @@ training:
   rollout_every: -1 # dummy
   checkpoint_every: 10
   val_every: 1
-  sample_every: -1 # dummy
+  # in steps
+  sample_every: -1 # in steps, <=0 disables recon_action_l1_loss logging
   # steps per epoch
   max_train_steps: null
   max_val_steps: null

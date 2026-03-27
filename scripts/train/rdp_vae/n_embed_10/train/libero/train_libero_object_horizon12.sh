@@ -2,7 +2,7 @@
 
 GPU_ID=2
 horizon=12
-num_epochs=400
+num_epochs=1001
 batch_size=256
 suite=libero_object
 

@@ -111,15 +111,13 @@ class TrainATWorkspace(BaseWorkspace):
         self.model.to(device)
         optimizer_to(self.optimizer, device)
 
-        # save batch for sampling
-        train_sampling_batch = None
-
         if cfg.training.debug:
             cfg.training.num_epochs = 2
             cfg.training.max_train_steps = 3
             cfg.training.max_val_steps = 3
             cfg.training.checkpoint_every = 1
             cfg.training.val_every = 1
+            cfg.training.sample_every = 1
 
         # training loop
         log_path = os.path.join(self.output_dir, 'logs.json.txt')
@@ -133,8 +131,6 @@ class TrainATWorkspace(BaseWorkspace):
                     for batch_idx, batch in enumerate(tepoch):
                         # device transfer
                         batch = dict_apply(batch, lambda x: x.to(device, non_blocking=True))
-                        if train_sampling_batch is None:
-                            train_sampling_batch = batch
                         # compute loss
                         loss_metric_dict = self.model.compute_loss_and_metric(batch)
                         raw_loss = loss_metric_dict["loss"]
@@ -180,6 +176,15 @@ class TrainATWorkspace(BaseWorkspace):
                             step_log.update({
                                 'train_kl_loss': kl_loss
                             })
+                        if cfg.training.sample_every > 0 and (self.global_step % cfg.training.sample_every) == 0:
+                            self.model.eval()
+                            with torch.no_grad():
+                                gt_action = batch['action']
+                                predict_action = self.model.encode_then_decode(batch)
+                                gt_action=gt_action.to(predict_action.device)
+                                recon_action_l1_loss = torch.nn.functional.l1_loss(predict_action, gt_action)
+                            self.model.train()
+                            step_log['recon_action_l1_loss'] = recon_action_l1_loss.item()
 
                         is_last_batch = (batch_idx == (len(train_dataloader) - 1))
                         if not is_last_batch:

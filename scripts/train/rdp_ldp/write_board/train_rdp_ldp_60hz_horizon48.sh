@@ -1,6 +1,6 @@
 # #!/bin/bash
 
-GPU_ID=2
+GPU_ID=0
 
 horizon=48
 
@@ -9,7 +9,7 @@ TASK_NAME="wipe"
 # DATASET_PATH="/data/kywang/projects/tactile_il/data/processed/vase_new_C/rdp_zarr"
 DATASET_PATH="/home/kywang/projects/efficient_robot_sys/data/ckpts/write_board_60hz/rdp_zarr"
 LOGGING_MODE="online"
-TIMESTAMP=write_board_rdp_ldp_60hz_horizon${horizon}
+TIMESTAMP=write_board_ldp_horizon${horizon}_l1loss_record
 SEARCH_PATH="./data/outputs"
 
 
@@ -35,4 +35,6 @@ CUDA_VISIBLE_DEVICES=${GPU_ID} accelerate launch train.py \
     at.horizon=${horizon} \
     at.n_obs_steps=1 \
     at.policy.use_rnn_decoder=False \
-    at.policy.n_embed=10
+    at.policy.n_embed=10 \
+    logging.project=diffusion_policy_tactile \
+    logging.id=write_board_ldp

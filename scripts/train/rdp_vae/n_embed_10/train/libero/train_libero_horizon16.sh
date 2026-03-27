@@ -1,10 +1,10 @@
 # #!/bin/bash
 
-GPU_ID=3
-horizon=12
-num_epochs=1001
+GPU_ID=2
+horizon=16
+num_epochs=400
 batch_size=256
-suite=libero_spatial
+suite=libero
 
 TASK_NAME="wipe"
 DATASET_PATH="/home/kywang/projects/efficient_robot_sys/data/ckpts/${suite}_wo_img/rdp_zarr"

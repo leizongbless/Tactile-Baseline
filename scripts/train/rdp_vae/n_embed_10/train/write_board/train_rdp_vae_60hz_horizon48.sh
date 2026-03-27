@@ -24,7 +24,9 @@ CUDA_VISIBLE_DEVICES=${GPU_ID} python train.py \
     at.horizon=48 \
     at.n_obs_steps=1 \
     at.policy.use_rnn_decoder=False \
-    at.policy.n_embed=10
+    at.policy.n_embed=10 \
+    logging.id=write_board_vae_1 \
+    training.sample_every=5
 
 
 # echo "Searching for the latest AT checkpoint..."
