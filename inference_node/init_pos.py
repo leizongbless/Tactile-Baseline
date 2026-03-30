@@ -54,13 +54,13 @@ if __name__ == '__main__':
     # time.sleep(1)
 
     ### timer_no_lift_higher
-    angle = [1.522119, -0.167026, -0.396674, 1.503997, -0.088486, 1.546412, -1.959906] #计时器 版本二
-    arm.set_servo_angle(angle=angle, speed=speed, is_radian=True, wait=True)
-    time.sleep(1)
-
-    ### 地鼠
-    # angle = [1.523113, -0.23686, -0.031949, 1.115768, 0.043972, 1.226282, -1.700487] #地鼠
+    # angle = [1.522119, -0.167026, -0.396674, 1.503997, -0.088486, 1.546412, -1.959906] #计时器 版本二
     # arm.set_servo_angle(angle=angle, speed=speed, is_radian=True, wait=True)
     # time.sleep(1)
+
+    ### 地鼠
+    angle = [1.523113, -0.23686, -0.031949, 1.115768, 0.043972, 1.226282, -1.700487] #地鼠
+    arm.set_servo_angle(angle=angle, speed=speed, is_radian=True, wait=True)
+    time.sleep(1)
 
     arm.disconnect()
