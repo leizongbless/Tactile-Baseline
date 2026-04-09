@@ -13,6 +13,15 @@ LOGGING_MODE="online"
 TIMESTAMP=write_board_rdp_vae_60hz_horizon48_downsample${downsample}
 SEARCH_PATH="./data/outputs"
 
+# optimize dataload
+export OMP_NUM_THREADS=1
+export MKL_NUM_THREADS=1
+export OPENBLAS_NUM_THREADS=1
+export NUMEXPR_NUM_THREADS=1
+export TOKENIZERS_PARALLELISM=false
+num_workers=32
+batch_size=128
+
 
 # Stage 1: Train Asymmetric Tokenizer
 echo "Stage 1: training Asymmetric Tokenizer..."
@@ -29,7 +38,9 @@ CUDA_VISIBLE_DEVICES=${GPU_ID} python train.py \
     at.n_obs_steps=1 \
     at.policy.use_rnn_decoder=False \
     at.policy.n_embed=10 \
-    at.policy.conv_layer_num=${conv_layer_num}
+    at.policy.conv_layer_num=${conv_layer_num} \
+    dataloader.num_workers=${num_workers} \
+    dataloader.batch_size=${batch_size}
 
 
 # echo "Searching for the latest AT checkpoint..."

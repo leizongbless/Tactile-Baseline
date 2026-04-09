@@ -1,6 +1,6 @@
 # #!/bin/bash
 
-GPU_ID=7
+GPU_ID=0
 horizon=96
 
 TASK_NAME="wipe"
@@ -10,6 +10,15 @@ DATASET_PATH="/home/kywang/projects/efficient_robot_sys/data/ckpts/hit_mouse_60h
 LOGGING_MODE="online"
 TIMESTAMP=hit_mouse_rdp_vae_60hz_horizon${horizon}
 SEARCH_PATH="./data/outputs"
+
+# optimize dataload
+export OMP_NUM_THREADS=1
+export MKL_NUM_THREADS=1
+export OPENBLAS_NUM_THREADS=1
+export NUMEXPR_NUM_THREADS=1
+export TOKENIZERS_PARALLELISM=false
+num_workers=32
+batch_size=128
 
 # Stage 1: Train Asymmetric Tokenizer
 echo "Stage 1: training Asymmetric Tokenizer..."
@@ -25,4 +34,6 @@ CUDA_VISIBLE_DEVICES=${GPU_ID} python train.py \
     at.horizon=${horizon} \
     at.n_obs_steps=1 \
     at.policy.use_rnn_decoder=False \
-    at.policy.n_embed=10
+    at.policy.n_embed=10 \
+    dataloader.num_workers=${num_workers} \
+    dataloader.batch_size=${batch_size}

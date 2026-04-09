@@ -12,6 +12,14 @@ LOGGING_MODE="online"
 TIMESTAMP=${suite}_vae_horizon${horizon}_num_epochs${num_epochs}
 SEARCH_PATH="./data/outputs"
 
+# optimize dataload
+export OMP_NUM_THREADS=1
+export MKL_NUM_THREADS=1
+export OPENBLAS_NUM_THREADS=1
+export NUMEXPR_NUM_THREADS=1
+export TOKENIZERS_PARALLELISM=false
+num_workers=32
+
 # Stage 1: Train Asymmetric Tokenizer
 echo "Stage 1: training Asymmetric Tokenizer..."
 CUDA_VISIBLE_DEVICES=${GPU_ID} python train.py \
@@ -27,5 +35,6 @@ CUDA_VISIBLE_DEVICES=${GPU_ID} python train.py \
     at.n_obs_steps=1 \
     at.policy.use_rnn_decoder=False \
     at.policy.n_embed=7 \
+    dataloader.num_workers=${num_workers} \
     dataloader.batch_size=${batch_size} \
     training.num_epochs=${num_epochs}

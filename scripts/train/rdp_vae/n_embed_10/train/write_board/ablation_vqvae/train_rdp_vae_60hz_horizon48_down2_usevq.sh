@@ -13,6 +13,15 @@ LOGGING_MODE="online"
 TIMESTAMP=write_board_rdp_vae_60hz_horizon48_usevq_downsample${downsample}
 SEARCH_PATH="./data/outputs"
 
+# optimize dataload
+export OMP_NUM_THREADS=1
+export MKL_NUM_THREADS=1
+export OPENBLAS_NUM_THREADS=1
+export NUMEXPR_NUM_THREADS=1
+export TOKENIZERS_PARALLELISM=false
+num_workers=32
+batch_size=128
+
 use_vq=True
 n_latent_dims=10
 
@@ -33,7 +42,9 @@ CUDA_VISIBLE_DEVICES=${GPU_ID} python train.py \
     at.policy.n_embed=10 \
     at.policy.use_vq=${use_vq} \
     at.policy.n_latent_dims=${n_latent_dims} \
-    at.policy.conv_layer_num=${conv_layer_num} 
+    at.policy.conv_layer_num=${conv_layer_num} \
+    dataloader.num_workers=${num_workers} \
+    dataloader.batch_size=${batch_size}
 
 
 # echo "Searching for the latest AT checkpoint..."
