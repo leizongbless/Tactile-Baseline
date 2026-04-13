@@ -3,7 +3,7 @@
 # echo "sleep for 14400"
 # sleep 14400
 
-GPU_ID=0
+GPU_ID=1
 
 horizon=96
 
