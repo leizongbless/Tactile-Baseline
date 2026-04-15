@@ -1,0 +1,3 @@
+vae训练的时候，要注意控制num_workers和线程数量
+dp和ldp训练的时候，要注意使用kernel=3
+以及要注意epoch数量
