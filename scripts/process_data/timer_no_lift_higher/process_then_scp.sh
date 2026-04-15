@@ -1,7 +1,10 @@
-echo "process 15hz"
-bash scripts/process_data/timer_no_lift_higher/process_data_30hz.sh
+# echo "process 15hz"
+# bash scripts/process_data/timer_no_lift_higher/process_data_30hz.sh
 
-echo "process 60hz"
-bash scripts/process_data/timer_no_lift_higher/process_data_60hz.sh
+# echo "process 60hz"
+# bash scripts/process_data/timer_no_lift_higher/process_data_60hz.sh
 
-scp -P 1030 -r  /home/tars/projects/visual_tactile_policy/kywang/processed_timer_no_lift_higher root@8.130.212.67:/mnt/data/kywang/visual_tactile/dataset/
+# scp -P 1030 -r  /home/tars/projects/visual_tactile_policy/kywang/processed_timer_no_lift_higher_0413 root@8.130.212.67:/mnt/data/kywang/visual_tactile/dataset/
+rsync -avzP -e "ssh -p 22" \
+    /home/tars/projects/visual_tactile_policy/kywang/processed_timer_no_lift_higher_0413 \
+    root@10.10.54.14:/mnt/data/kywang/visual_tactile/dataset/
