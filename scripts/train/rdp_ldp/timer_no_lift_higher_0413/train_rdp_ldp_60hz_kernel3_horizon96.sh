@@ -1,5 +1,5 @@
 # #!/bin/bash
-GPU_ID=0
+GPU_ID=6
 
 horizon=96
 
@@ -8,9 +8,9 @@ TASK_NAME="wipe"
 # DATASET_PATH="/data/kywang/projects/tactile_il/data/processed/vase_new_C/rdp_zarr"
 DATASET_PATH="/mnt/data/kywang/4090_env/projects/efficient_robot_sys/data/ckpts/timer_no_lift_higher_0413_60hz/rdp_zarr"
 LOGGING_MODE="online"
-TIMESTAMP=timer_no_lift_higher_0413_rdp_ldp_60hz_horizon${horizon}
+num_epochs=600
+TIMESTAMP=timer_no_lift_higher_0413_ldp_60hz_horizon${horizon}_epochs${num_epochs}_
 SEARCH_PATH="./data/outputs"
-num_epochs=450 
 kernel_size=3
 
 
@@ -29,10 +29,11 @@ CUDA_VISIBLE_DEVICES=${GPU_ID} accelerate launch train.py \
     task=real_${TASK_NAME}_image_gelsight_emb_ldp_24fps_without_tactile \
     task.dataset_path=${DATASET_PATH} \
     task.dataset.relative_action=False \
-    task.name=real_${TASK_NAME}_ldp_${TIMESTAMP} \
+    task.name=ldp_${TIMESTAMP} \
     at=at_wipe_lift \
     at_load_dir=${AT_LOAD_DIR} \
     logging.mode=${LOGGING_MODE} \
+    logging.id=${TIMESTAMP} \
     at.dataset_obs_temporal_downsample_ratio=1 \
     at.horizon=${horizon} \
     at.n_obs_steps=1 \

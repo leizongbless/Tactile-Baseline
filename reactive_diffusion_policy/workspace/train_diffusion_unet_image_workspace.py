@@ -225,6 +225,55 @@ class TrainDiffusionUnetImageWorkspace(BaseWorkspace):
             cfg.training.val_every = 1
             cfg.training.sample_every = 1
 
+        step_level_eval = cfg.training.get('step_level_eval', True)
+
+        def run_train_sampling(step_log, train_sampling_batch):
+            policy = accelerator.unwrap_model(self.model)
+            if cfg.training.use_ema:
+                policy = self.ema_model
+            was_training = policy.training
+            policy.eval()
+
+            with torch.no_grad():
+                # sample trajectory from training set, and evaluate difference
+                batch = dict_apply(train_sampling_batch, lambda x: x.to(device, non_blocking=True))
+                obs_dict = batch['obs']
+                if 'extended_obs' in batch.keys():
+                    extended_obs_dict = batch['extended_obs']
+                else:
+                    extended_obs_dict = None
+                gt_action = batch['action']
+
+                if 'latent' in cfg.name:
+                    dataset_obs_temporal_downsample_ratio = cfg.task.dataset.obs_temporal_downsample_ratio
+                    result = policy.predict_action(obs_dict,
+                                                   extended_obs_dict=extended_obs_dict,
+                                                   dataset_obs_temporal_downsample_ratio=dataset_obs_temporal_downsample_ratio)
+                else:
+                    result = policy.predict_action(obs_dict)
+                pred_action = result['action_pred']
+                # import pdb; pdb.set_trace()
+
+                all_preds, all_gt = accelerator.gather_for_metrics((pred_action, gt_action))
+
+                mse = torch.nn.functional.mse_loss(all_preds, all_gt)
+                step_log['train_action_mse_error'] = mse.item()
+
+                l1 = torch.mean(torch.abs(all_preds[:,:,:9] - all_gt[:,:,:9]))
+                step_log['train_pose_l1_error'] = l1.item()
+                del batch
+                del obs_dict
+                del gt_action
+                del result
+                del pred_action
+                del mse
+                del l1
+
+            if was_training:
+                policy.train()
+                if (not cfg.training.use_ema) and cfg.training.freeze_encoder:
+                    policy.obs_encoder.eval()
+
         # training loop
         log_path = os.path.join(self.output_dir, 'logs.json.txt')
         with JsonLogger(log_path) as json_logger:
@@ -270,6 +319,11 @@ class TrainDiffusionUnetImageWorkspace(BaseWorkspace):
                             'lr': lr_scheduler.get_last_lr()[0]
                         }
 
+                        if step_level_eval and cfg.training.sample_every > 0 \
+                                and (self.global_step % cfg.training.sample_every) == 0:
+                            run_train_sampling(step_log, train_sampling_batch)
+                            accelerator.wait_for_everyone()
+
                         is_last_batch = (batch_idx == (len(train_dataloader)-1))
                         if not is_last_batch:
                             # log of last step is combined with validation and rollout
@@ -292,7 +346,7 @@ class TrainDiffusionUnetImageWorkspace(BaseWorkspace):
                     policy = self.ema_model
                 policy.eval()
 
-                # run validation
+                # run validation. By default val_ratio is zero
                 if cfg.task.dataset.val_ratio > 0 and (self.epoch % cfg.training.val_every) == 0 and accelerator.is_main_process:
                     with torch.no_grad():
                         val_losses = list()
@@ -311,41 +365,9 @@ class TrainDiffusionUnetImageWorkspace(BaseWorkspace):
                             step_log['val_loss'] = val_loss
 
                 # run diffusion sampling on a training batch
-                if (self.epoch % cfg.training.sample_every) == 0:
-                    with torch.no_grad():
-                        # sample trajectory from training set, and evaluate difference
-                        batch = dict_apply(train_sampling_batch, lambda x: x.to(device, non_blocking=True))
-                        obs_dict = batch['obs']
-                        if 'extended_obs' in batch.keys():
-                            extended_obs_dict = batch['extended_obs']
-                        else:
-                            extended_obs_dict = None
-                        gt_action = batch['action']
-
-                        if 'latent' in cfg.name:
-                            dataset_obs_temporal_downsample_ratio = cfg.task.dataset.obs_temporal_downsample_ratio
-                            result = policy.predict_action(obs_dict,
-                                                           extended_obs_dict=extended_obs_dict,
-                                                           dataset_obs_temporal_downsample_ratio=dataset_obs_temporal_downsample_ratio)
-                        else:
-                            result = policy.predict_action(obs_dict)
-                        pred_action = result['action_pred']
-                        # import pdb; pdb.set_trace()
-
-                        all_preds, all_gt = accelerator.gather_for_metrics((pred_action, gt_action))
-
-                        mse = torch.nn.functional.mse_loss(all_preds, all_gt)
-                        step_log['train_action_mse_error'] = mse.item()
-
-                        l1 = torch.mean(torch.abs(all_preds[:,:,:9] - all_gt[:,:,:9]))
-                        step_log['train_pose_l1_error'] = l1.item()
-                        del batch
-                        del obs_dict
-                        del gt_action
-                        del result
-                        del pred_action
-                        del mse
-                        del l1
+                if (not step_level_eval) and cfg.training.sample_every > 0 \
+                        and (self.epoch % cfg.training.sample_every) == 0:
+                    run_train_sampling(step_log, train_sampling_batch)
                 accelerator.wait_for_everyone()
                 
                 # checkpoint
