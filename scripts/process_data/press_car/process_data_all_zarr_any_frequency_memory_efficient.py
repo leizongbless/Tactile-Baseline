@@ -250,10 +250,24 @@ def get_pca_matrix(data, n_components=15):
     return transform_matrix, center_matrix
 
 
+# def append_to_zarr_dataset(dataset, batch):
+#     batch = np.asarray(batch)
+#     prev_len = dataset.shape[0]
+#     dataset.resize(prev_len + batch.shape[0], axis=0)
+#     dataset[prev_len:prev_len + batch.shape[0]] = batch
+
 def append_to_zarr_dataset(dataset, batch):
     batch = np.asarray(batch)
     prev_len = dataset.shape[0]
-    dataset.resize(prev_len + batch.shape[0], axis=0)
+
+    # 检查除第0维外，其余维度是否匹配
+    if batch.shape[1:] != dataset.shape[1:]:
+        raise ValueError(
+            f"Shape mismatch: batch.shape={batch.shape}, dataset.shape={dataset.shape}"
+        )
+
+    new_shape = (prev_len + batch.shape[0],) + dataset.shape[1:]
+    dataset.resize(new_shape)
     dataset[prev_len:prev_len + batch.shape[0]] = batch
 
 
