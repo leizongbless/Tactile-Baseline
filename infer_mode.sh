@@ -29,14 +29,14 @@ NC='\033[0m' # No Color
 # 关闭所有相关终端
 close_all_terminals() {
     cd $PROJ_MAIN_DIR && python gripper_open.py && sleep 0.5 && python init_pos.py
-    sleep 3
+    sleep 0.5
     echo -e "${YELLOW}正在关闭所有终端窗口...${NC}"
     pkill -f "gnome-terminal.*$MAIN_TERMINAL_TITLE" 2>/dev/null
     pkill -f "$CAMERA_CMD" 2>/dev/null
     pkill -f "$XARM_CMD" 2>/dev/null
     pkill -f "$TACTILE_CMD" 2>/dev/null
     pkill -f "$ROS_CMD" 2>/dev/null
-    sleep 1
+    sleep 0.2
 }
 
 
@@ -113,7 +113,7 @@ execute_step() {
             echo -e "${GREEN}系统已安全退出${NC}"
             exit 0 
             ;;
-        *) echo -e "${RED}无效输入，请重试${NC}"; sleep 1 ;;
+        *) echo -e "${RED}无效输入，请重试${NC}"; sleep 0.5 ;;
     esac
 }
 
@@ -124,7 +124,7 @@ while true; do
     case $choice in
         [1]) execute_step "$choice" ;;
         0) execute_step 0 ;;
-        *) echo -e "${RED}无效输入，请重试${NC}"; sleep 1 ;;
+        *) echo -e "${RED}无效输入，请重试${NC}"; sleep 0.5 ;;
     esac
     echo -e "${YELLOW}按回车继续...${NC}"
     read -r

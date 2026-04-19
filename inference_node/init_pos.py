@@ -16,56 +16,61 @@ if __name__ == '__main__':
     speed = 0.6
 
     # angle = [1.478541, -0.524974, 0.076473, 1.297253, -0.071307, 1.764924, -1.59078]
-    angle = [1.478278, -0.267359, -0.354714, 1.36086, -0.147519, 1.528497, -2.015091]
-    arm.set_servo_angle(angle=angle, speed=speed, is_radian=True, wait=True)
-    time.sleep(1)
-    angle = [1.478288, -0.166976, -0.292118, 1.391008, -0.102355, 1.403859, -1.958061]
-    arm.set_servo_angle(angle=angle, speed=speed, is_radian=True, wait=True)
-    time.sleep(1)
+    # angle = [1.478278, -0.267359, -0.354714, 1.36086, -0.147519, 1.528497, -2.015091]
+    # arm.set_servo_angle(angle=angle, speed=speed, is_radian=True, wait=True)
+    # time.sleep(0.5)
+    # angle = [1.478288, -0.166976, -0.292118, 1.391008, -0.102355, 1.403859, -1.958061]
+    # arm.set_servo_angle(angle=angle, speed=speed, is_radian=True, wait=True)
+    # time.sleep(0.5)
 
     ### vase_sponge_test1
     # angle = [1.47827, -0.105039, -0.413837, 0.865564, -0.103457, 0.964442, -2.015087]
     # arm.set_servo_angle(angle=angle, speed=speed, is_radian=True, wait=True)
-    # time.sleep(1)
+    # time.sleep(0.5)
 
     ### peel_cucumber
     # angle = [1.478748, -0.122841, -0.437593, 0.906287, -0.087462, 1.008328, -1.995694]
     # arm.set_servo_angle(angle=angle, speed=speed, is_radian=True, wait=True)
-    # time.sleep(1)
+    # time.sleep(0.5)
 
     ### wipe_vase_ky
     # angle = [1.47827, -0.105039, -0.413837, 0.865564, -0.103457, 0.964442, -2.015087]
     # arm.set_servo_angle(angle=angle, speed=speed, is_radian=True, wait=True)
-    # time.sleep(1)
+    # time.sleep(0.5)
 
     ### push_square
     # angle = [1.478385, -0.280153, -0.391595, 0.949745, -0.157129, 1.18542, -1.99573]
     # arm.set_servo_angle(angle=angle, speed=speed, is_radian=True, wait=True)
-    # time.sleep(1)
+    # time.sleep(0.5)
 
     ### write board
     # angle = [1.310907, -0.295834, -0.285056, 0.748937, -0.163687, 0.952801, -1.998413]
     # arm.set_servo_angle(angle=angle, speed=speed, is_radian=True, wait=True)
-    # time.sleep(1)
+    # time.sleep(0.5)
 
     ### timer
     # angle = [1.522664, -0.219693, -0.454553, 1.258073, -0.079435, 1.363711, -2.040055] #计时器
     # arm.set_servo_angle(angle=angle, speed=speed, is_radian=True, wait=True)
-    # time.sleep(1)
+    # time.sleep(0.5)
 
     ### timer_no_lift_higher
     # angle = [1.522119, -0.167026, -0.396674, 1.503997, -0.088486, 1.546412, -1.959906] #计时器 版本二
     # arm.set_servo_angle(angle=angle, speed=speed, is_radian=True, wait=True)
-    # time.sleep(1)
+    # time.sleep(0.5)
 
     ### 地鼠
-    # angle = [1.523113, -0.23686, -0.031949, 1.115768, 0.043972, 1.226282, -1.700487] #地鼠
-    # arm.set_servo_angle(angle=angle, speed=speed, is_radian=True, wait=True)
-    # time.sleep(1)
+    angle = [1.523113, -0.23686, -0.031949, 1.115768, 0.043972, 1.226282, -1.700487] #地鼠
+    arm.set_servo_angle(angle=angle, speed=speed, is_radian=True, wait=True)
+    time.sleep(0.5)
 
     ### press car
-    angle = [1.583739, -0.324849, 0.043444, 1.281194, 0.069844, 1.541703, -1.570833]
-    arm.set_servo_angle(angle=angle, speed=speed, is_radian=True, wait=True)
-    time.sleep(1)
+    # angle = [1.583739, -0.324849, 0.043444, 1.281194, 0.069844, 1.541703, -1.570833]
+    # arm.set_servo_angle(angle=angle, speed=speed, is_radian=True, wait=True)
+    # time.sleep(0.5)
+    
+    ### hit car
+    # angle = [1.606176, -0.625732, -0.496335, 0.802034, -0.24824, 1.252679, -1.961329] #磁悬浮小车
+    # arm.set_servo_angle(angle=angle, speed=speed, is_radian=True, wait=True)
+    # time.sleep(0.5)
 
     arm.disconnect()
