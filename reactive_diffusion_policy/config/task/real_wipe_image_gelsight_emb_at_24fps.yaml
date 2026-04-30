@@ -16,13 +16,6 @@ shape_meta: &shape_meta
     left_robot_gripper_width:
       shape: [1]
       type: low_dim
-    left_gripper1_marker_offset_emb:
-      shape: [ 15 ]  # the raw dimension is (63*2), we use PCA to reduce the dimension to 15
-      type: low_dim
-  extended_obs: # for the AT RNN decoder of the latent diffusion policy
-    left_gripper1_marker_offset_emb:
-      shape: [ 15 ]  # the raw dimension is (63*2), we use PCA to reduce the dimension to 15
-      type: low_dim
   action:
     shape: [10] # (3+6+1) (x, y, z, 6d rotation, gripper_width)
 
