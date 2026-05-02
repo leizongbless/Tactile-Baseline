@@ -1,0 +1,791 @@
+"""
+统一参数化版本（支持 15Hz / 30Hz / 60Hz）
+并删除 depth 相关逻辑：
+
+- 不读取 depth.pkl
+- 不做 point cloud / global_pts
+- 不做基于 depth 的 camera2 裁剪
+- 输出只保留 image / tactile / robot / gripper / action
+
+支持参数：
+- --target_fps
+- --start_z_diff_thresh
+- --end_extra_frames
+"""
+
+import os
+import pickle
+import numpy as np
+import cv2
+import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use('Agg')
+
+from scipy.spatial.transform import Rotation as R
+from sklearn.decomposition import PCA, IncrementalPCA
+import argparse
+import tqdm
+import zarr
+import gc
+import time
+
+
+def visualize_tactile(save_path, tactile):
+    tactile = tactile.reshape(2, -1, 3)
+    xy0 = tactile[0, :, :2]
+    xy1 = tactile[1, :, :2]
+
+    fig = plt.figure(figsize=(8, 15))
+    plt.scatter(xy1[:, 0], xy1[:, 1], c='red', s=10)
+    plt.scatter(xy0[:, 0], xy0[:, 1], c='blue', s=10)
+    plt.xticks([])
+    plt.yticks([])
+    plt.xlabel('')
+    plt.ylabel('')
+    plt.box(True)
+    plt.tight_layout(pad=2.0)
+    plt.savefig(save_path, dpi=300)
+    plt.close(fig)
+    time.sleep(0.05)
+    gc.collect()
+
+
+def visualize_two_tactile(save_path, left_tactile, right_tactile):
+    fig, axs = plt.subplots(1, 2, figsize=(15, 15))
+
+    xy0_left = left_tactile[0, :, :2]
+    xy1_left = left_tactile[1, :, :2]
+    axs[0].scatter(xy1_left[:, 0], xy1_left[:, 1], c='red', s=15)
+    axs[0].scatter(xy0_left[:, 0], xy0_left[:, 1], c='blue', s=15)
+    axs[0].set_title('Left Hand Tactile')
+    axs[0].set_xlabel('')
+    axs[0].set_ylabel('')
+    axs[0].set_box_aspect(1)
+    axs[0].set_aspect('equal', adjustable='datalim')
+    axs[0].spines['top'].set_visible(True)
+    axs[0].spines['right'].set_visible(True)
+
+    xy0_right = right_tactile[0, :, :2]
+    xy1_right = right_tactile[1, :, :2]
+    axs[1].scatter(xy1_right[:, 0], xy1_right[:, 1], c='red', s=15)
+    axs[1].scatter(xy0_right[:, 0], xy0_right[:, 1], c='blue', s=15)
+    axs[1].set_title('Right Hand Tactile')
+    axs[1].set_xlabel('')
+    axs[1].set_ylabel('')
+    axs[1].set_box_aspect(1)
+    axs[1].set_aspect('equal', adjustable='datalim')
+    axs[1].spines['top'].set_visible(True)
+    axs[1].spines['right'].set_visible(True)
+
+    plt.tight_layout(pad=2.0)
+    plt.savefig(save_path, dpi=300)
+    plt.close()
+
+
+def visualize_two_tactile_normal(save_path, tac1_n, tac2_n):
+    heatmap1 = np.abs(tac1_n.reshape(35, 20))
+    heatmap2 = np.abs(tac2_n.reshape(35, 20))
+
+    fig, axes = plt.subplots(1, 2, figsize=(14, 6))
+
+    im1 = axes[0].imshow(heatmap1, cmap='hot', aspect='auto')
+    axes[0].set_title('Heatmap 1')
+    axes[0].set_xlabel('Width')
+    axes[0].set_ylabel('Height')
+    axes[0].set_xticks([])
+    axes[0].set_yticks([])
+    fig.colorbar(im1, ax=axes[0], fraction=0.046, pad=0.04)
+
+    im2 = axes[1].imshow(heatmap2, cmap='hot', aspect='auto')
+    axes[1].set_title('Heatmap 2')
+    axes[1].set_xlabel('Width')
+    axes[1].set_ylabel('Height')
+    axes[1].set_xticks([])
+    axes[1].set_yticks([])
+    fig.colorbar(im2, ax=axes[1], fraction=0.046, pad=0.04)
+
+    plt.tight_layout(pad=2.0)
+    plt.savefig(save_path, dpi=300)
+    plt.close()
+
+
+def visual_tac_info(save_path, tac_data):
+    t = tac_data.shape[0]
+    labels = ['x', 'y', 'z']
+    fig, axes = plt.subplots(3, 1, figsize=(12, 14), sharex=True)
+
+    for i in range(3):
+        axis_data = tac_data[:, :, i]
+        mean_vals = []
+        abs_mean_vals = []
+        for row in axis_data:
+            nonzero = row[row != 0]
+            if len(nonzero) > 0:
+                mean_vals.append(nonzero.mean())
+                abs_mean_vals.append(np.abs(nonzero).mean())
+            else:
+                mean_vals.append(0)
+                abs_mean_vals.append(0)
+        mean_vals = np.array(mean_vals)
+        abs_mean_vals = np.array(abs_mean_vals)
+
+        median_vals = np.median(axis_data, axis=1)
+        max_vals = np.max(axis_data, axis=1)
+        min_vals = np.min(axis_data, axis=1)
+        nonzero_ratio = np.count_nonzero(axis_data, axis=1) / 700.0
+
+        ax = axes[i]
+        time_axis = np.arange(1, t + 1)
+        ax.plot(time_axis, mean_vals, label='Mean (nonzero)')
+        ax.plot(time_axis, abs_mean_vals, label='Abs Mean (nonzero)')
+        ax.plot(time_axis, median_vals, label='Median')
+        ax.plot(time_axis, max_vals, label='Max')
+        ax.plot(time_axis, min_vals, label='Min')
+        ax.plot(time_axis, nonzero_ratio, label='Nonzero Ratio')
+        ax.set_ylabel(f'{labels[i]} value')
+        ax.set_title(f'{labels[i]} axis statistics over time')
+        ax.legend()
+        ax.grid(True)
+
+    axes[-1].set_xlabel('Time Frame')
+    plt.tight_layout()
+    plt.savefig(save_path, dpi=300)
+    plt.close(fig)
+
+
+def get_action_seq(action_data_path):
+    with open(action_data_path, 'rb') as f:
+        data = pickle.load(f)
+
+    eef_pose = np.array(data['eef_pose'])
+    angle_max = np.abs(eef_pose)[:, 3:].max()
+    if angle_max < 3.15:
+        eef_pose[:, 3:] = eef_pose[:, 3:] / np.pi * 180.0
+
+    eef_pose_6d = eef_pose.copy()
+    time_stamps = np.array(data['timestamps'])
+    rot6d = []
+
+    for i in range(eef_pose.shape[0]):
+        eef_matrix = R.from_euler('xyz', eef_pose[i, 3:, 0], degrees=True).as_matrix()
+        rot6d.append(np.concatenate([eef_matrix[:, 0], eef_matrix[:, 1]]))
+
+    eef_pose = np.concatenate([eef_pose[:, :3, 0], np.array(rot6d)], axis=1)
+    return eef_pose, eef_pose_6d, time_stamps
+
+
+def sync_and_truncate_timestamps(ts_dict):
+    starts = [arr[0] for arr in ts_dict.values()]
+    max_start = max(starts)
+
+    camera1 = ts_dict['camera1']
+    begin_idx = np.searchsorted(camera1, max_start, side='left')
+    if begin_idx >= len(camera1):
+        raise ValueError("max_start比camera1所有时间都大，无法同步")
+    begin = camera1[begin_idx]
+
+    start_indices = {}
+    for k, arr in ts_dict.items():
+        if k == 'camera1':
+            idx = np.searchsorted(arr, begin, side='left')
+        else:
+            idx = np.abs(arr - begin).argmin()
+        start_indices[k] = idx
+
+    ends = [arr[-1] for arr in ts_dict.values()]
+    min_end = min(ends)
+
+    end_idx = np.searchsorted(camera1, min_end, side='right') - 1
+    if end_idx < 0:
+        raise ValueError("min_end比camera1所有时间都小，无法同步")
+    end = camera1[end_idx]
+
+    cut_time = end + 60
+    end_indices = {}
+    for k, arr in ts_dict.items():
+        idx = np.searchsorted(arr, cut_time, side='right')
+        end_indices[k] = idx
+
+    processed_ts = {}
+    for k, arr in ts_dict.items():
+        s, e = start_indices[k], end_indices[k]
+        processed_ts[k] = arr[s:e]
+
+    return processed_ts, start_indices, end_indices, begin, end
+
+
+def downsample_fixed_fps(timestamp, target_fps):
+    timestamp = np.asarray(timestamp)
+    start_time = timestamp[0]
+    end_time = timestamp[-1]
+    step = 1000 / target_fps
+
+    num_out = int(np.floor((end_time - start_time) / step)) + 1
+    target_times = start_time + np.arange(num_out) * step
+
+    sel_idx = [np.abs(timestamp - t).argmin() for t in target_times]
+    sel_idx = np.array(sel_idx)
+    return timestamp[sel_idx], sel_idx
+
+
+def downsample_array_by_timestamp(data, timestamp, target_fps):
+    sampled_timestamp, sampled_idx = downsample_fixed_fps(timestamp, target_fps)
+    sampled_data = data[sampled_idx]
+    return sampled_data, sampled_timestamp, sampled_idx
+
+
+def align_timestamps(standard_ts, other_ts):
+    standard_ts = np.asarray(standard_ts)
+    other_ts = np.asarray(other_ts)
+    indices = np.abs(standard_ts[:, None] - other_ts[None, :]).argmin(axis=1)
+    aligned_other_ts = other_ts[indices]
+    return aligned_other_ts, indices
+
+
+def get_pca_matrix(data, n_components=15):
+    pca = PCA(n_components=n_components)
+    pca.fit(data)
+    transform_matrix = pca.components_
+    center_matrix = pca.mean_
+    return transform_matrix, center_matrix
+
+
+# def append_to_zarr_dataset(dataset, batch):
+#     batch = np.asarray(batch)
+#     prev_len = dataset.shape[0]
+#     dataset.resize(prev_len + batch.shape[0], axis=0)
+#     dataset[prev_len:prev_len + batch.shape[0]] = batch
+
+def append_to_zarr_dataset(dataset, batch):
+    batch = np.asarray(batch)
+    prev_len = dataset.shape[0]
+
+    # 检查除第0维外，其余维度是否匹配
+    if batch.shape[1:] != dataset.shape[1:]:
+        raise ValueError(
+            f"Shape mismatch: batch.shape={batch.shape}, dataset.shape={dataset.shape}"
+        )
+
+    new_shape = (prev_len + batch.shape[0],) + dataset.shape[1:]
+    dataset.resize(new_shape)
+    dataset[prev_len:prev_len + batch.shape[0]] = batch
+
+
+def fit_incremental_pca_from_zarr(dataset, n_components=15, batch_size=2048):
+    ipca = IncrementalPCA(n_components=n_components)
+    num_samples = dataset.shape[0]
+    for start in range(0, num_samples, batch_size):
+        end = min(start + batch_size, num_samples)
+        batch = np.asarray(dataset[start:end, :, :2], dtype=np.float32).reshape(end - start, -1)
+        ipca.partial_fit(batch)
+    return ipca
+
+
+def transform_zarr_tactile_to_embedding(src_dataset, dst_dataset, pca, batch_size=2048):
+    num_samples = src_dataset.shape[0]
+    for start in range(0, num_samples, batch_size):
+        end = min(start + batch_size, num_samples)
+        batch = np.asarray(src_dataset[start:end, :, :2], dtype=np.float32).reshape(end - start, -1)
+        emb = pca.transform(batch).astype(np.float32, copy=False)
+        dst_dataset[start:end] = emb
+
+
+def find_start_end_by_zdiff(states_arrays, z_diff_thresh, end_extra_frames):
+    if len(states_arrays) <= 1:
+        return 0, len(states_arrays)
+
+    z_diff = np.diff(states_arrays[:, 2])
+
+    start_candidates = np.where(np.abs(z_diff) > z_diff_thresh)[0]
+    if len(start_candidates) == 0:
+        start_frame = 0
+    else:
+        start_frame = int(start_candidates[0])
+
+    # 从末尾开始找第一个超过阈值的 z_diff
+    rev_candidates = np.where(np.abs(z_diff[::-1]) > z_diff_thresh)[0]
+    if len(rev_candidates) == 0:
+        end_frame = len(states_arrays)
+    else:
+        last_diff_idx = len(z_diff) - 1 - int(rev_candidates[0])
+        end_frame = last_diff_idx + 1 + int(end_extra_frames)
+        end_frame = min(end_frame, len(states_arrays))
+
+    if end_frame <= start_frame:
+        end_frame = min(len(states_arrays), start_frame + 1)
+
+    return start_frame, end_frame
+
+
+def process_one_episode(
+    data_path,
+    policy,
+    target_fps,
+    start_z_diff_thresh,
+    end_extra_frames,
+    vis_save_path=None,
+    save_camera_vis=False,
+    save_tactile_vis=False
+):
+    image_data_path = os.path.join(data_path, 'image.pkl')
+    gripper_data_path = os.path.join(data_path, 'gripper.pkl')
+    tactile_data_path = os.path.join(data_path, 'tactile.pkl')
+    action_data_path = os.path.join(data_path, 'state.pkl')
+
+    try:
+        camera_data_dict = {}
+        image_data = pickle.load(open(image_data_path, 'rb'))
+        for camera in image_data.keys():
+            image_list = np.array(image_data[camera]['image'])
+            image_stamps = np.array(image_data[camera]['timestamps'])
+            camera_data_dict[camera] = {
+                'image': image_list,
+                'timestamps': image_stamps
+            }
+
+        tac_data = pickle.load(open(tactile_data_path, 'rb'))
+        tac1_data_dict = tac_data['tactile1']
+        tac2_data_dict = tac_data['tactile2']
+        for key in tac1_data_dict.keys():
+            tac1_data_dict[key] = np.array(tac1_data_dict[key])
+        for key in tac2_data_dict.keys():
+            tac2_data_dict[key] = np.array(tac2_data_dict[key])
+
+        eef_pose, eef_pose_6d, action_timestamps = get_action_seq(action_data_path)
+
+        gripper_data_dict = pickle.load(open(gripper_data_path, 'rb'))
+        for key in gripper_data_dict.keys():
+            gripper_data_dict[key] = np.array(gripper_data_dict[key])
+
+        sensor_timestamps_dict = {
+            'camera1': camera_data_dict['camera1']['timestamps'],
+            'tactile1': tac1_data_dict['timestamps'],
+            'tactile2': tac2_data_dict['timestamps'],
+            'gripper': gripper_data_dict['timestamps'],
+            'robot': action_timestamps
+        }
+        processed_ts, start_indices, end_indices, _, _ = sync_and_truncate_timestamps(sensor_timestamps_dict)
+
+        camera1_timestamps = processed_ts['camera1']
+        tactile1_timestamps = processed_ts['tactile1']
+        tactile2_timestamps = processed_ts['tactile2']
+        robot_timestamps = processed_ts['robot']
+        gripper_timestamps = processed_ts['gripper']
+
+        for key in camera_data_dict['camera1'].keys():
+            camera_data_dict['camera1'][key] = camera_data_dict['camera1'][key][
+                start_indices['camera1']: end_indices['camera1']
+            ]
+
+        tac1_data = tac1_data_dict['deform'][start_indices['tactile1']: end_indices['tactile1']]
+        tac2_data = tac2_data_dict['deform'][start_indices['tactile2']: end_indices['tactile2']]
+        robot_data = eef_pose[start_indices['robot']: end_indices['robot']]
+        robot_6d_data = eef_pose_6d[start_indices['robot']: end_indices['robot']]
+        gripper_data = gripper_data_dict['gripper_pos'][start_indices['gripper']: end_indices['gripper']]
+
+        tac1_data, tactile1_timestamps, _ = downsample_array_by_timestamp(tac1_data, tactile1_timestamps, target_fps)
+        tac2_data, tactile2_timestamps, _ = downsample_array_by_timestamp(tac2_data, tactile2_timestamps, target_fps)
+        robot_data, robot_timestamps, robot_idx = downsample_array_by_timestamp(robot_data, robot_timestamps, target_fps)
+        robot_6d_data = robot_6d_data[robot_idx]
+        gripper_data, gripper_timestamps, _ = downsample_array_by_timestamp(gripper_data, gripper_timestamps, target_fps)
+
+        if policy == 'dp_zarr':
+            image_resize_shape = (320, 240)
+
+            _, cam1_indices = align_timestamps(robot_timestamps, camera1_timestamps)
+            _, tac1_indices = align_timestamps(robot_timestamps, tactile1_timestamps)
+            _, tac2_indices = align_timestamps(robot_timestamps, tactile2_timestamps)
+            _, gripper_indices = align_timestamps(robot_timestamps, gripper_timestamps)
+
+            tac1_arrays = tac1_data[tac1_indices].reshape(len(robot_timestamps), -1, 3)
+            tac2_arrays = tac2_data[tac2_indices].reshape(len(robot_timestamps), -1, 3)
+            camera1_image_arrays = camera_data_dict['camera1']['image'][cam1_indices]
+
+            states_arrays = robot_data
+            states_6d_arrays = robot_6d_data
+            gripper_arrays = gripper_data[gripper_indices][:, None]
+
+            # 使用 z_diff 前向/反向检测 start/end
+            start_frame, end_frame = find_start_end_by_zdiff(
+                states_arrays,
+                z_diff_thresh=start_z_diff_thresh,
+                end_extra_frames=end_extra_frames
+            )
+
+            print(
+                f'[target_fps={target_fps}] start: {start_frame}, end: {end_frame}, '
+                f'start_z_diff_thresh={start_z_diff_thresh}, end_extra_frames={end_extra_frames}'
+            )
+
+            aligned_timestamps = robot_timestamps[start_frame:end_frame]
+            camera1_image_arrays = camera1_image_arrays[start_frame:end_frame]
+
+            tac1_n_arrays = tac1_arrays[start_frame:end_frame][:, :, 2]
+            tac2_n_arrays = tac2_arrays[start_frame:end_frame][:, :, 2]
+            tac1_xy_arrays = tac1_arrays[start_frame:end_frame][:, :, :2]
+            tac2_xy_arrays = tac2_arrays[start_frame:end_frame][:, :, :2]
+
+            tcp_pose_arrays = states_arrays[start_frame:end_frame].copy()
+            states_6d_arrays = states_6d_arrays[start_frame:end_frame][:, :, 0]
+            tcp_pose_arrays[:, :3] /= 1000.0
+            gripper_arrays = gripper_arrays[start_frame:end_frame] / 255.0
+
+            state_arrays = np.concatenate([tcp_pose_arrays, gripper_arrays], axis=-1)
+            if len(state_arrays) > 1:
+                new_action_arrays = state_arrays[1:, ...].copy()
+                action_arrays = np.concatenate([new_action_arrays, new_action_arrays[-1][np.newaxis, :]], axis=0)
+            else:
+                action_arrays = state_arrays.copy()
+
+            if image_resize_shape is not None:
+                camera1_image_arrays = np.array([cv2.resize(img, image_resize_shape) for img in camera1_image_arrays])
+
+            if save_camera_vis:
+                save_image1 = os.path.join(vis_save_path, 'camera1', 'image')
+                save_video1 = os.path.join(vis_save_path, 'camera1', 'video')
+                os.makedirs(save_image1, exist_ok=True)
+                os.makedirs(save_video1, exist_ok=True)
+                for i in range(len(camera1_image_arrays)):
+                    cv2.imwrite(os.path.join(save_image1, str(aligned_timestamps[i]) + '.png'), camera1_image_arrays[i])
+
+                if len(camera1_image_arrays) > 0:
+                    h, w = camera1_image_arrays[0].shape[:2]
+                    video_path = os.path.join(save_video1, 'camera1.mp4')
+                    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+                    video_writer = cv2.VideoWriter(video_path, fourcc, float(target_fps), (w, h))
+
+                    for frame in camera1_image_arrays:
+                        video_writer.write(frame)
+                    video_writer.release()
+
+            if save_tactile_vis:
+                save_tactile_xy = os.path.join(vis_save_path, 'tactile_xy')
+                save_tactile_n = os.path.join(vis_save_path, 'tactile_n')
+                save_tactile_info = os.path.join(vis_save_path, 'tactile_info')
+                os.makedirs(save_tactile_xy, exist_ok=True)
+                os.makedirs(save_tactile_n, exist_ok=True)
+                os.makedirs(save_tactile_info, exist_ok=True)
+
+                x = np.linspace(-8.5, 8.5, 20)
+                y = np.linspace(30, 0, 35)
+                X, Y = np.meshgrid(x, y)
+                grid = np.stack([X, Y], axis=-1).reshape(-1, 2)
+                grid = np.expand_dims(grid, 0)
+                tac1_init_arrays = np.repeat(grid, tac1_xy_arrays.shape[0], axis=0)
+                tac2_init_arrays = tac1_init_arrays
+
+                visual_tac_info(
+                    os.path.join(save_tactile_info, 'tactile1.png'),
+                    np.concatenate((tac1_xy_arrays, tac1_n_arrays[..., None]), axis=-1)
+                )
+                visual_tac_info(
+                    os.path.join(save_tactile_info, 'tactile2.png'),
+                    np.concatenate((tac2_xy_arrays, tac2_n_arrays[..., None]), axis=-1)
+                )
+
+                for i in range(tac1_init_arrays.shape[0]):
+                    left_tac = np.stack((tac1_init_arrays[i], tac1_init_arrays[i] + tac1_xy_arrays[i]), axis=0)
+                    right_tac = np.stack((tac2_init_arrays[i], tac2_init_arrays[i] + tac2_xy_arrays[i]), axis=0)
+                    visualize_two_tactile(
+                        os.path.join(save_tactile_xy, str(aligned_timestamps[i]) + '.png'),
+                        left_tac,
+                        right_tac
+                    )
+                    visualize_two_tactile_normal(
+                        os.path.join(save_tactile_n, str(aligned_timestamps[i]) + '.png'),
+                        tac1_n_arrays[i],
+                        tac2_n_arrays[i]
+                    )
+
+            tac1_arrays_out = np.concatenate((tac1_xy_arrays, tac1_n_arrays[..., None]), axis=-1)
+            tac2_arrays_out = np.concatenate((tac2_xy_arrays, tac2_n_arrays[..., None]), axis=-1)
+
+            return (
+                tcp_pose_arrays,
+                gripper_arrays,
+                tac1_arrays_out,
+                tac2_arrays_out,
+                camera1_image_arrays[..., ::-1],
+                action_arrays
+            )
+
+    except Exception as e:
+        print(f"Error loading data: {data_path}")
+        print(f"Exception: {e}")
+        return None
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--save_camera_vis", action="store_true", help="开启摄像头可视化")
+    parser.add_argument("--save_tactile_vis", action="store_true", help="开启触觉信号可视化")
+    parser.add_argument("--save_action_vis", action="store_true", help="开启action可视化")
+    parser.add_argument("--root_path", type=str, default="/mnt/sda/tactile_dataset", help="where to load")
+    parser.add_argument("--save_path", type=str, default="/home/tars/projects/dataset", help="where to save")
+    parser.add_argument("--policy", nargs="+", type=str, default=["dp_zarr"], help="policy list")
+    parser.add_argument("--task_list", nargs="+", type=str, default=["vase2_new_A"], help="task list")
+    parser.add_argument("--episode_length", type=int, default=-1, help="limit episode length, -1 means all")
+
+    parser.add_argument("--target_fps", type=int, default=30, help="target fps, e.g. 15 / 30 / 60")
+    parser.add_argument("--start_z_diff_thresh", type=float, default=1.5,
+                        help="threshold for detecting motion start/end from diff(states[:,2])")
+    parser.add_argument("--end_extra_frames", type=int, default=3,
+                        help="extra frames kept after detected end")
+
+    args = parser.parse_args()
+
+    save_camera_vis = args.save_camera_vis
+    save_tactile_vis = args.save_tactile_vis
+    save_action_vis = args.save_action_vis
+    policy = args.policy
+    task_list = args.task_list
+    root_path = args.root_path
+    save_path = args.save_path
+
+    print(
+        "save_camera_vis:", args.save_camera_vis,
+        "save_tactile_vis:", args.save_tactile_vis,
+        "save_action_vis:", args.save_action_vis,
+        "episode_length:", args.episode_length,
+        "target_fps:", args.target_fps,
+        "start_z_diff_thresh:", args.start_z_diff_thresh,
+        "end_extra_frames:", args.end_extra_frames
+    )
+
+    if len(task_list) == 1:
+        task = task_list[0]
+        data_dir = os.path.join(root_path, task)
+        episode_list = [os.path.join(data_dir, i) for i in sorted(os.listdir(data_dir))]
+        if args.episode_length != -1:
+            episode_list = episode_list[:args.episode_length]
+    else:
+        episode_list = []
+        task = ''
+        for task_name in task_list:
+            data_dir = os.path.join(root_path, task_name)
+            task += task_name + '_'
+            for episode in sorted(os.listdir(data_dir)):
+                episode_list.append(os.path.join(data_dir, episode))
+
+    save_data_path = os.path.join(save_path, f"{task}_fps{args.target_fps}")
+
+    if 'dp_zarr' in policy:
+        save_zarr_path = os.path.join(save_data_path, 'rdp_zarr/replay_buffer.zarr')
+        save_pca_path = os.path.join(save_data_path, 'rdp_pca')
+        os.makedirs(os.path.dirname(save_zarr_path), exist_ok=True)
+        os.makedirs(save_pca_path, exist_ok=True)
+
+        episode_end_list = []
+        total_frames = 0
+        zarr_root = zarr.open_group(save_zarr_path, mode='w')
+        zarr_data = zarr_root.create_group('data', overwrite=True)
+        zarr_meta = zarr_root.create_group('meta', overwrite=True)
+        compressor = zarr.Blosc(cname='zstd', clevel=3, shuffle=1)
+
+        left_robot_tcp_pose_ds = None
+        left_gripper1_tactile_ds = None
+        left_gripper2_tactile_ds = None
+        action_ds = None
+        left_robot_gripper_width_ds = None
+        left_wrist_img_ds = None
+
+        for episode_id in tqdm.tqdm(range(len(episode_list))):
+            data_path = episode_list[episode_id]
+            vis_save_path = os.path.join(save_data_path, str("%04d" % episode_id))
+            print('loading episode:', data_path)
+
+            episode_info = process_one_episode(
+                data_path=data_path,
+                policy='dp_zarr',
+                target_fps=args.target_fps,
+                start_z_diff_thresh=args.start_z_diff_thresh,
+                end_extra_frames=args.end_extra_frames,
+                vis_save_path=vis_save_path,
+                save_camera_vis=save_camera_vis,
+                save_tactile_vis=save_tactile_vis
+            )
+
+            if episode_info is None:
+                continue
+
+            left_robot_tcp_pose, left_robot_gripper_width, left_gripper1_marker_offset, left_gripper2_marker_offset, \
+            left_wrist_img, action = episode_info
+
+            if left_robot_tcp_pose_ds is None:
+                left_robot_tcp_pose_ds = zarr_data.create_dataset(
+                    'left_robot_tcp_pose',
+                    shape=(0, left_robot_tcp_pose.shape[1]),
+                    chunks=(10000, left_robot_tcp_pose.shape[1]),
+                    dtype='float32',
+                    overwrite=True,
+                    compressor=compressor
+                )
+                left_gripper1_tactile_ds = zarr_data.create_dataset(
+                    'left_gripper1_tactile',
+                    shape=(0, left_gripper1_marker_offset.shape[1], left_gripper1_marker_offset.shape[2]),
+                    chunks=(100, left_gripper1_marker_offset.shape[1], left_gripper1_marker_offset.shape[2]),
+                    dtype='float32',
+                    overwrite=True,
+                    compressor=compressor
+                )
+                left_gripper2_tactile_ds = zarr_data.create_dataset(
+                    'left_gripper2_tactile',
+                    shape=(0, left_gripper2_marker_offset.shape[1], left_gripper2_marker_offset.shape[2]),
+                    chunks=(100, left_gripper2_marker_offset.shape[1], left_gripper2_marker_offset.shape[2]),
+                    dtype='float32',
+                    overwrite=True,
+                    compressor=compressor
+                )
+                action_ds = zarr_data.create_dataset(
+                    'action',
+                    shape=(0, action.shape[1]),
+                    chunks=(10000, action.shape[1]),
+                    dtype='float32',
+                    overwrite=True,
+                    compressor=compressor
+                )
+                left_robot_gripper_width_ds = zarr_data.create_dataset(
+                    'left_robot_gripper_width',
+                    shape=(0, left_robot_gripper_width.shape[1]),
+                    chunks=(10000, left_robot_gripper_width.shape[1]),
+                    dtype='float32',
+                    overwrite=True,
+                    compressor=compressor
+                )
+                left_wrist_img_ds = zarr_data.create_dataset(
+                    'left_wrist_img',
+                    shape=(0,) + left_wrist_img.shape[1:],
+                    chunks=(100,) + left_wrist_img.shape[1:],
+                    dtype='uint8',
+                    overwrite=True
+                )
+
+            append_to_zarr_dataset(left_robot_tcp_pose_ds, left_robot_tcp_pose.astype(np.float32, copy=False))
+            append_to_zarr_dataset(left_robot_gripper_width_ds, left_robot_gripper_width.astype(np.float32, copy=False))
+            append_to_zarr_dataset(left_gripper1_tactile_ds, left_gripper1_marker_offset.astype(np.float32, copy=False))
+            append_to_zarr_dataset(left_gripper2_tactile_ds, left_gripper2_marker_offset.astype(np.float32, copy=False))
+            append_to_zarr_dataset(action_ds, action.astype(np.float32, copy=False))
+            append_to_zarr_dataset(left_wrist_img_ds, left_wrist_img.astype(np.uint8, copy=False))
+
+            total_frames += len(left_robot_tcp_pose)
+            episode_end_list.append(total_frames)
+
+            del episode_info
+            del left_robot_tcp_pose
+            del left_robot_gripper_width
+            del left_gripper1_marker_offset
+            del left_gripper2_marker_offset
+            del left_wrist_img
+            del action
+            gc.collect()
+
+        if total_frames == 0:
+            raise ValueError('No valid episode found for dp_zarr processing.')
+
+        episode_ends_arrays = np.array(episode_end_list, dtype=np.int64)
+        zarr_meta.create_dataset(
+            'episode_ends',
+            data=episode_ends_arrays,
+            chunks=(min(10000, len(episode_ends_arrays)),),
+            dtype='int64',
+            overwrite=True,
+            compressor=compressor
+        )
+
+        if save_action_vis:
+            fig = plt.figure()
+            ax = fig.add_subplot(111, projection='3d')
+            from matplotlib import cm
+            colors = cm.rainbow(np.linspace(0, 1, len(episode_end_list)))
+            prev_end = 0
+            for cnt, end in enumerate(episode_end_list):
+                traj = np.asarray(action_ds[prev_end:end])
+                ax.scatter(traj[:, 0], traj[:, 1], traj[:, 2], color=colors[cnt], s=10)
+                prev_end = end
+            ax.set_xlabel('X')
+            ax.set_ylabel('Y')
+            ax.set_zlabel('Z')
+            plt.tight_layout()
+            plt.savefig(os.path.join(save_pca_path, 'trajectories_3d.png'), dpi=300)
+            plt.close(fig)
+
+        # pca1 = fit_incremental_pca_from_zarr(left_gripper1_tactile_ds)
+        # pca2 = fit_incremental_pca_from_zarr(left_gripper2_tactile_ds)
+
+        # np.save(os.path.join(save_pca_path, 'pca_matrix1.npy'), pca1.components_.T)
+        # np.save(os.path.join(save_pca_path, 'pca_matrix2.npy'), pca2.components_.T)
+        # np.save(os.path.join(save_pca_path, 'pca_mean1.npy'), pca1.mean_)
+        # np.save(os.path.join(save_pca_path, 'pca_mean2.npy'), pca2.mean_)
+
+        # left_gripper1_marker_offset_emb_ds = zarr_data.create_dataset(
+        #     'left_gripper1_marker_offset_emb',
+        #     shape=(total_frames, pca1.n_components_),
+        #     chunks=(10000, pca1.n_components_),
+        #     dtype='float32',
+        #     overwrite=True,
+        #     compressor=compressor
+        # )
+        # left_gripper2_marker_offset_emb_ds = zarr_data.create_dataset(
+        #     'left_gripper2_marker_offset_emb',
+        #     shape=(total_frames, pca2.n_components_),
+        #     chunks=(10000, pca2.n_components_),
+        #     dtype='float32',
+        #     overwrite=True,
+        #     compressor=compressor
+        # )
+
+        # transform_zarr_tactile_to_embedding(left_gripper1_tactile_ds, left_gripper1_marker_offset_emb_ds, pca1)
+        # transform_zarr_tactile_to_embedding(left_gripper2_tactile_ds, left_gripper2_marker_offset_emb_ds, pca2)
+
+        del episode_ends_arrays
+        gc.collect()
+
+    if 'tac_wm' in policy:
+        train_data = []
+        test_data = []
+        num_total = len(episode_list)
+        num_train = int(num_total * 0.9)
+        random_indices = np.random.permutation(num_total)
+        train_indices = random_indices[:num_train]
+        test_indices = random_indices[num_train:]
+
+        for episode_id in tqdm.tqdm(range(num_total)):
+            data_path = episode_list[episode_id]
+            print('loading episode:', data_path)
+
+            episode_data = process_one_episode(
+                data_path=data_path,
+                policy='tac_wm',
+                target_fps=args.target_fps,
+                start_z_diff_thresh=args.start_z_diff_thresh,
+                end_extra_frames=args.end_extra_frames
+            )
+
+            if episode_data is None:
+                continue
+
+            if episode_id in train_indices:
+                train_data.extend(episode_data)
+            else:
+                test_data.extend(episode_data)
+
+        save_path_train = os.path.join(save_data_path, 'tacwm_samples', 'train')
+        save_path_test = os.path.join(save_data_path, 'tacwm_samples', 'test')
+        os.makedirs(save_path_train, exist_ok=True)
+        os.makedirs(save_path_test, exist_ok=True)
+
+        for i in range(len(train_data)):
+            sample = train_data[i]
+            save_name = os.path.join(save_path_train, str("%05d" % i) + '.pkl')
+            with open(save_name, 'wb') as f:
+                pickle.dump(sample, f)
+            print(f'create training samples: {i + 1} / {len(train_data)}')
+
+        for i in range(len(test_data)):
+            sample = test_data[i]
+            save_name = os.path.join(save_path_test, str("%05d" % i) + '.pkl')
+            with open(save_name, 'wb') as f:
+                pickle.dump(sample, f)
+            print(f'create testing samples: {i + 1} / {len(test_data)}')
+
+        print('end')
