@@ -59,9 +59,9 @@ if __name__ == '__main__':
     # time.sleep(0.5)
 
     ### 地鼠
-    angle = [1.523113, -0.23686, -0.031949, 1.115768, 0.043972, 1.226282, -1.700487] #地鼠
-    arm.set_servo_angle(angle=angle, speed=speed, is_radian=True, wait=True)
-    time.sleep(0.5)
+    # angle = [1.523113, -0.23686, -0.031949, 1.115768, 0.043972, 1.226282, -1.700487] #地鼠
+    # arm.set_servo_angle(angle=angle, speed=speed, is_radian=True, wait=True)
+    # time.sleep(0.5)
 
     ### press car
     # angle = [1.583739, -0.324849, 0.043444, 1.281194, 0.069844, 1.541703, -1.570833]
@@ -72,5 +72,11 @@ if __name__ == '__main__':
     # angle = [1.606176, -0.625732, -0.496335, 0.802034, -0.24824, 1.252679, -1.961329] #磁悬浮小车
     # arm.set_servo_angle(angle=angle, speed=speed, is_radian=True, wait=True)
     # time.sleep(0.5)
+
+    ### pass car
+    angle = [1.537283, -0.625141, -0.135869, 0.89665, -0.080894, 1.360821, -1.700182]  #磁悬浮小车
+    arm.set_servo_angle(angle=angle, speed=speed, is_radian=True, wait=True)
+    time.sleep(0.5)
+
 
     arm.disconnect()
