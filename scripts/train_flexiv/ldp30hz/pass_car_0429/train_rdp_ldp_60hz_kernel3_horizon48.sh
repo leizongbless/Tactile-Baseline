@@ -1,9 +1,9 @@
 # #!/bin/bash
 # 24 horizon is not suitable for training ldp
 
-GPU_ID=0
+GPU_ID=3
 
-horizon=24
+horizon=48
 
 TASK_NAME="wipe"
 # Point to the dataset directory that contains 'replay_buffer.zarr'
