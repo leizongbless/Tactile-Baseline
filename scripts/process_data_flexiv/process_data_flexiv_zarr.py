@@ -1,4 +1,13 @@
+"""
+python scripts/process_data_flexiv/visualize_flexiv_zarr_dataset.py   --dataset_path /mnt/data/kywang/visual_tactile/flexiv_dataset/Flexiv_pass_car_0429   --num_trajectories 5 --max_video_frames -1
+"""
+
+
 import argparse
+import os
+import shutil
+import time
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import cv2
@@ -86,6 +95,68 @@ def decode_hdf5_path(value):
     return str(value)
 
 
+def load_and_resize_image(image_path, image_size):
+    width, height = image_size
+    image_bgr = cv2.imread(str(image_path), cv2.IMREAD_COLOR)
+    if image_bgr is None:
+        raise RuntimeError(f"Failed to read image: {image_path}")
+    if image_bgr.shape[1] != width or image_bgr.shape[0] != height:
+        image_bgr = cv2.resize(
+            image_bgr, (width, height), interpolation=cv2.INTER_AREA
+        )
+    return image_bgr[..., ::-1]
+
+
+def find_start_end_by_zdiff(states_arrays, z_diff_thresh, end_extra_frames):
+    if z_diff_thresh <= 0 or len(states_arrays) <= 1:
+        return 0, len(states_arrays)
+
+    z_diff = np.diff(states_arrays[:, 2])
+    return find_start_end_by_abs_zdiff(
+        np.abs(z_diff),
+        z_diff_thresh=z_diff_thresh,
+        end_extra_frames=end_extra_frames,
+        num_frames=len(states_arrays),
+    )
+
+
+def find_start_end_by_multi_zdiff(states_arrays_list, z_diff_thresh, end_extra_frames):
+    valid_arrays = [arr for arr in states_arrays_list if arr is not None and len(arr) > 1]
+    if z_diff_thresh <= 0 or not valid_arrays:
+        num_frames = 0 if not states_arrays_list else len(states_arrays_list[0])
+        return 0, num_frames
+
+    abs_z_diffs = [np.abs(np.diff(arr[:, 2])) for arr in valid_arrays]
+    combined_abs_z_diff = np.max(np.stack(abs_z_diffs, axis=0), axis=0)
+    return find_start_end_by_abs_zdiff(
+        combined_abs_z_diff,
+        z_diff_thresh=z_diff_thresh,
+        end_extra_frames=end_extra_frames,
+        num_frames=len(valid_arrays[0]),
+    )
+
+
+def find_start_end_by_abs_zdiff(abs_z_diff, z_diff_thresh, end_extra_frames, num_frames):
+    start_candidates = np.where(abs_z_diff > z_diff_thresh)[0]
+    if len(start_candidates) == 0:
+        start_frame = 0
+    else:
+        start_frame = int(start_candidates[0])
+
+    rev_candidates = np.where(abs_z_diff[::-1] > z_diff_thresh)[0]
+    if len(rev_candidates) == 0:
+        end_frame = num_frames
+    else:
+        last_diff_idx = len(abs_z_diff) - 1 - int(rev_candidates[0])
+        end_frame = last_diff_idx + 1 + int(end_extra_frames)
+        end_frame = min(end_frame, num_frames)
+
+    if end_frame <= start_frame:
+        end_frame = min(num_frames, start_frame + 1)
+
+    return start_frame, end_frame
+
+
 def process_one_episode(
     episode_path,
     camera_name,
@@ -93,6 +164,8 @@ def process_one_episode(
     target_fps,
     image_size,
     position_scale,
+    start_z_diff_thresh,
+    end_extra_frames,
     max_frames_per_episode=-1,
 ):
     hdf5_path = episode_path / "dataset.hdf5"
@@ -150,6 +223,22 @@ def process_one_episode(
         )
         gripper = np.asarray(gripper_records["value"], dtype=np.float32)[:, None]
 
+        start_frame, end_frame = find_start_end_by_zdiff(
+            tcp_pose,
+            z_diff_thresh=start_z_diff_thresh,
+            end_extra_frames=end_extra_frames,
+        )
+        print(
+            f"[target_fps={target_fps}] start: {start_frame}, end: {end_frame}, "
+            f"raw_frames={len(tcp_pose)}, start_z_diff_thresh={start_z_diff_thresh}, "
+            f"end_extra_frames={end_extra_frames}"
+        )
+
+        tcp_pose = tcp_pose[start_frame:end_frame]
+        gripper = gripper[start_frame:end_frame]
+        image_paths = image_paths[start_frame:end_frame]
+        selected_camera_timestamps = camera_timestamps[camera_indices][start_frame:end_frame]
+
         state_with_gripper = np.concatenate([tcp_pose, gripper], axis=1)
         if len(state_with_gripper) > 1:
             action = np.concatenate(
@@ -164,30 +253,41 @@ def process_one_episode(
             "left_robot_gripper_width": gripper.astype(np.float32, copy=False),
             "action": action.astype(np.float32, copy=False),
             "image_paths": image_paths,
-            "camera_timestamps": camera_timestamps[camera_indices],
+            "camera_timestamps": selected_camera_timestamps,
             "source_fps": estimate_fps(camera_timestamps),
             "image_size": image_size,
+            "start_frame": start_frame,
+            "end_frame": end_frame,
+            "raw_frame_count": len(camera_indices),
         }
 
 
-def append_images_from_paths(dataset, image_paths, image_size, batch_size=128):
+def append_images_from_paths(dataset, image_paths, image_size, batch_size=128, num_workers=1):
     width, height = image_size
     prev_len = dataset.shape[0]
     dataset.resize((prev_len + len(image_paths),) + dataset.shape[1:])
 
-    for start in range(0, len(image_paths), batch_size):
-        end = min(start + batch_size, len(image_paths))
-        batch = np.empty((end - start, height, width, 3), dtype=np.uint8)
-        for local_idx, image_path in enumerate(image_paths[start:end]):
-            image_bgr = cv2.imread(str(image_path), cv2.IMREAD_COLOR)
-            if image_bgr is None:
-                raise RuntimeError(f"Failed to read image: {image_path}")
-            if image_bgr.shape[1] != width or image_bgr.shape[0] != height:
-                image_bgr = cv2.resize(
-                    image_bgr, (width, height), interpolation=cv2.INTER_AREA
+    if num_workers > 1:
+        with ThreadPoolExecutor(max_workers=num_workers) as executor:
+            for start in range(0, len(image_paths), batch_size):
+                end = min(start + batch_size, len(image_paths))
+                batch_paths = image_paths[start:end]
+                batch_list = list(
+                    executor.map(
+                        lambda path: load_and_resize_image(path, image_size),
+                        batch_paths,
+                    )
                 )
-            batch[local_idx] = image_bgr[..., ::-1]
-        dataset[prev_len + start:prev_len + end] = batch
+                batch = np.asarray(batch_list, dtype=np.uint8)
+                dataset[prev_len + start:prev_len + end] = batch
+    else:
+        for start in range(0, len(image_paths), batch_size):
+            end = min(start + batch_size, len(image_paths))
+            batch_paths = image_paths[start:end]
+            batch = np.empty((end - start, height, width, 3), dtype=np.uint8)
+            for local_idx, image_path in enumerate(batch_paths):
+                batch[local_idx] = load_and_resize_image(image_path, image_size)
+            dataset[prev_len + start:prev_len + end] = batch
 
 
 def resolve_episode_list(root_path, task_list, episode_length):
@@ -239,6 +339,8 @@ def write_readme(save_data_path, args, total_frames, episode_ends, source_fps_va
         f"arm_source: {args.arm}",
         f"target_fps: {args.target_fps} Hz",
         f"source_camera_fps: {source_fps_text}",
+        f"start_z_diff_thresh: {args.start_z_diff_thresh}",
+        f"end_extra_frames: {args.end_extra_frames}",
         f"episode_count: {len(episode_ends)}",
         f"total_frames: {total_frames}",
         f"image_size: {args.image_width}x{args.image_height} (stored as HWC RGB uint8)",
@@ -255,6 +357,7 @@ def write_readme(save_data_path, args, total_frames, episode_ends, source_fps_va
         "notes:",
         "  tactile keys are intentionally not stored.",
         "  key names match the xarm dataset convention for image-only training configs.",
+        "  start/end frames are trimmed by detecting abs(diff(z)) above start_z_diff_thresh.",
     ]
     readme_path = save_data_path / "readme.txt"
     readme_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
@@ -289,12 +392,33 @@ def main():
     parser.add_argument("--image_height", type=int, default=240)
     parser.add_argument("--position_scale", type=float, default=1.0)
     parser.add_argument(
+        "--start_z_diff_thresh",
+        type=float,
+        default=0.001,
+        help="Trim start/end by abs(diff(tcp_z)); <=0 disables trimming.",
+    )
+    parser.add_argument(
+        "--end_extra_frames",
+        type=int,
+        default=3,
+        help="Extra frames kept after detected motion end.",
+    )
+    parser.add_argument(
         "--max_frames_per_episode",
         type=int,
         default=-1,
         help="Debug option. -1 means keep all selected frames.",
     )
     parser.add_argument("--image_batch_size", type=int, default=128)
+    parser.add_argument("--image_num_workers", type=int, default=8)
+    parser.add_argument("--stage_in_tmpfs", action=argparse.BooleanOptionalAction, default=True)
+    parser.add_argument("--tmpfs_root", type=str, default="/dev/shm/flexiv_zarr")
+    parser.add_argument(
+        "--cleanup_tmpfs_after_copy",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+    )
+    parser.add_argument("--profile_timing", action=argparse.BooleanOptionalAction, default=True)
     args = parser.parse_args()
 
     try:
@@ -309,18 +433,27 @@ def main():
     episode_list, output_name = resolve_episode_list(
         args.root_path, args.task_list, args.episode_length
     )
-    save_data_path = Path(args.save_path) / output_name
+    final_save_data_path = Path(args.save_path) / output_name
+    if args.stage_in_tmpfs:
+        save_data_path = Path(args.tmpfs_root) / f"{output_name}_{os.getpid()}"
+        if save_data_path.exists():
+            shutil.rmtree(save_data_path)
+    else:
+        save_data_path = final_save_data_path
     save_zarr_path = save_data_path / "replay_buffer.zarr"
     save_data_path.mkdir(parents=True, exist_ok=True)
 
     print("Flexiv processing settings:")
     print(f"  root_path: {args.root_path}")
     print(f"  task_list: {args.task_list}")
-    print(f"  save_data_path: {save_data_path}")
+    print(f"  final_save_data_path: {final_save_data_path}")
+    print(f"  staging_save_data_path: {save_data_path}")
     print(f"  save_zarr_path: {save_zarr_path}")
     print(f"  target_fps: {args.target_fps}")
     print(f"  camera_name: {args.camera_name}")
     print(f"  arm: {args.arm}")
+    print(f"  image_num_workers: {args.image_num_workers}")
+    print(f"  stage_in_tmpfs: {args.stage_in_tmpfs}")
     print(f"  episode_count: {len(episode_list)}")
 
     zarr_root = zarr.open_group(str(save_zarr_path), mode="w")
@@ -363,9 +496,18 @@ def main():
     episode_end_list = []
     source_fps_values = []
     total_frames = 0
+    timing = {
+        "process_episode_s": 0.0,
+        "append_lowdim_s": 0.0,
+        "append_image_s": 0.0,
+        "copy_to_final_s": 0.0,
+        "total_s": time.perf_counter(),
+    }
 
     for episode_path in tqdm.tqdm(episode_list):
         print(f"loading episode: {episode_path}")
+        episode_start_t = time.perf_counter()
+        t0 = time.perf_counter()
         episode_data = process_one_episode(
             episode_path=episode_path,
             camera_name=args.camera_name,
@@ -373,9 +515,13 @@ def main():
             target_fps=args.target_fps,
             image_size=(args.image_width, args.image_height),
             position_scale=args.position_scale,
+            start_z_diff_thresh=args.start_z_diff_thresh,
+            end_extra_frames=args.end_extra_frames,
             max_frames_per_episode=args.max_frames_per_episode,
         )
+        timing["process_episode_s"] += time.perf_counter() - t0
 
+        t0 = time.perf_counter()
         append_to_zarr_dataset(
             left_robot_tcp_pose_ds, episode_data["left_robot_tcp_pose"]
         )
@@ -383,16 +529,28 @@ def main():
             left_robot_gripper_width_ds, episode_data["left_robot_gripper_width"]
         )
         append_to_zarr_dataset(action_ds, episode_data["action"])
+        timing["append_lowdim_s"] += time.perf_counter() - t0
+
+        t0 = time.perf_counter()
         append_images_from_paths(
             left_wrist_img_ds,
             episode_data["image_paths"],
             image_size=(args.image_width, args.image_height),
             batch_size=args.image_batch_size,
+            num_workers=args.image_num_workers,
         )
+        timing["append_image_s"] += time.perf_counter() - t0
 
         total_frames += len(episode_data["action"])
         episode_end_list.append(total_frames)
         source_fps_values.append(episode_data["source_fps"])
+        if args.profile_timing:
+            episode_elapsed = time.perf_counter() - episode_start_t
+            print(
+                f"episode frames={len(episode_data['action'])}, "
+                f"elapsed={episode_elapsed:.3f}s, "
+                f"avg={episode_elapsed / max(len(episode_data['action']), 1) * 1000:.3f}ms/frame"
+            )
 
     if total_frames == 0:
         raise ValueError("No valid frames were written.")
@@ -410,11 +568,36 @@ def main():
     zarr_root.attrs["target_fps"] = float(args.target_fps)
     zarr_root.attrs["camera_name"] = args.camera_name
     zarr_root.attrs["arm_source"] = args.arm
+    zarr_root.attrs["start_z_diff_thresh"] = float(args.start_z_diff_thresh)
+    zarr_root.attrs["end_extra_frames"] = int(args.end_extra_frames)
     zarr_root.attrs["total_frames"] = int(total_frames)
 
     write_readme(save_data_path, args, total_frames, episode_ends, source_fps_values)
-    print(f"Finished. Wrote {total_frames} frames to {save_zarr_path}")
-    print(f"Readme: {save_data_path / 'readme.txt'}")
+
+    if args.stage_in_tmpfs:
+        final_save_data_path.parent.mkdir(parents=True, exist_ok=True)
+        if final_save_data_path.exists():
+            shutil.rmtree(final_save_data_path)
+        t0 = time.perf_counter()
+        shutil.copytree(save_data_path, final_save_data_path)
+        timing["copy_to_final_s"] += time.perf_counter() - t0
+        if args.cleanup_tmpfs_after_copy:
+            shutil.rmtree(save_data_path)
+
+    timing["total_s"] = time.perf_counter() - timing["total_s"]
+    print(f"Finished. Wrote {total_frames} frames to {final_save_data_path / 'replay_buffer.zarr'}")
+    print(f"Final dataset: {final_save_data_path}")
+    print(f"Readme: {final_save_data_path / 'readme.txt'}")
+    if args.profile_timing:
+        print("\n=== Profiling Summary ===")
+        for key in [
+            "process_episode_s",
+            "append_lowdim_s",
+            "append_image_s",
+            "copy_to_final_s",
+            "total_s",
+        ]:
+            print(f"{key:>20}: {timing[key]:.3f}s")
 
 
 if __name__ == "__main__":

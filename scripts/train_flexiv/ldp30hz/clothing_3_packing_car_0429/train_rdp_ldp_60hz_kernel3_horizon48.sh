@@ -1,0 +1,43 @@
+# #!/bin/bash
+# 24 horizon is not suitable for training ldp
+
+GPU_ID=3
+
+horizon=48
+
+TASK_NAME="wipe"
+# Point to the dataset directory that contains 'replay_buffer.zarr'
+# DATASET_PATH="/data/kywang/projects/tactile_il/data/processed/vase_new_C/rdp_zarr"
+DATASET_PATH="/mnt/data/kywang/4090_env/projects/efficient_robot_sys/data/ckpts/flexiv_clothing_3_packing_0429_30hz/rdp_zarr"
+LOGGING_MODE="online"
+TIMESTAMP=flexiv_clothing_3_packing_0429_ldp_horizon${horizon}
+SEARCH_PATH="./data/outputs"
+num_epochs=300 # 学习率怎么下降的
+kernel_size=3
+
+
+AT_LOAD_DIR="/mnt/data/kywang/4090_env/projects/efficient_robot_sys/data/ckpts/flexiv_clothing_3_packing_0429_30hz/ckpts_abs/rdp_vae/n_embed_10/horizon${horizon}/latest.ckpt"
+
+# # # Stage 2: Train Latent Diffusion Policy
+# # # Stage 2: Train Latent Diffusion Policy
+echo ""
+echo "Stage 2: training Latent Diffusion Policy..."
+CUDA_VISIBLE_DEVICES=${GPU_ID} accelerate launch train.py \
+    --config-name=train_latent_diffusion_unet_real_image_workspace \
+    policy.kernel_size=${kernel_size} \
+    policy.noise_scheduler.num_train_timesteps=30 \
+    policy.num_inference_steps=30 \
+    task=real_${TASK_NAME}_image_gelsight_emb_ldp_24fps_without_tactile \
+    task.dataset_path=${DATASET_PATH} \
+    task.dataset.relative_action=False \
+    task.name=real_${TASK_NAME}_ldp_kernel${kernel_size}_${TIMESTAMP} \
+    at=at_wipe_lift \
+    at_load_dir=${AT_LOAD_DIR} \
+    logging.mode=${LOGGING_MODE} \
+    at.dataset_obs_temporal_downsample_ratio=1 \
+    at.horizon=${horizon} \
+    at.n_obs_steps=1 \
+    at.policy.use_rnn_decoder=False \
+    at.policy.n_embed=10 \
+    training.num_epochs=${num_epochs} \
+    logging.id="train_flexiv_clothing_3_packing_0429_ldp_horizon${horizon}" \
