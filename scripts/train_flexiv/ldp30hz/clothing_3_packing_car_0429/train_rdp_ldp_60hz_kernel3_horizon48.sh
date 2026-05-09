@@ -16,7 +16,7 @@ num_epochs=400 # 学习率怎么下降的
 kernel_size=3
 
 
-AT_LOAD_DIR="/mnt/data/kywang/4090_env/projects/efficient_robot_sys/data/ckpts/flexiv_clothing_3_packing_0429_30hz/ckpts_abs/rdp_vae/n_embed_10/horizon${horizon}/latest.ckpt"
+AT_LOAD_DIR="/mnt/data/kywang/4090_env/projects/efficient_robot_sys/data/ckpts/flexiv_clothing_3_packing_0429_30hz/ckpts_abs/rdp_vae/n_embed_20/horizon${horizon}/latest.ckpt"
 
 # # # Stage 2: Train Latent Diffusion Policy
 # # # Stage 2: Train Latent Diffusion Policy
@@ -30,7 +30,7 @@ CUDA_VISIBLE_DEVICES=${GPU_ID} accelerate launch train.py \
     task=real_${TASK_NAME}_image_gelsight_emb_ldp_24fps_without_tactile_dual_arm \
     task.dataset_path=${DATASET_PATH} \
     task.dataset.relative_action=False \
-    task.name=real_${TASK_NAME}_ldp_kernel${kernel_size}_${TIMESTAMP} \
+    task.name=${TIMESTAMP} \
     at=at_wipe_lift \
     at_load_dir=${AT_LOAD_DIR} \
     logging.mode=${LOGGING_MODE} \
@@ -38,6 +38,6 @@ CUDA_VISIBLE_DEVICES=${GPU_ID} accelerate launch train.py \
     at.horizon=${horizon} \
     at.n_obs_steps=1 \
     at.policy.use_rnn_decoder=False \
-    at.policy.n_embed=10 \
+    at.policy.n_embed=20 \
     training.num_epochs=${num_epochs} \
     logging.id="train_flexiv_clothing_3_packing_0429_ldp_horizon${horizon}" \

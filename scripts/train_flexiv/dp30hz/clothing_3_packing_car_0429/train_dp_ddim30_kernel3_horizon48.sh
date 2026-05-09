@@ -7,7 +7,7 @@ kernel_size=3
 
 CUDA_VISIBLE_DEVICES=7 accelerate launch train.py \
     --config-name=train_diffusion_unet_real_image_workspace \
-    task=real_wipe_image_gelsight_emb_dp_ablation_ensemble_absolute_without_tactile \
+    task=real_wipe_image_gelsight_emb_dp_ablation_ensemble_absolute_without_tactile_dual_arm \
     task.dataset_path=/mnt/data/kywang/4090_env/projects/efficient_robot_sys/data/ckpts/flexiv_clothing_3_packing_0429_30hz/rdp_zarr \
     task.name=dp_ddim30_kernel${kernel_size}_flexiv_clothing_3_packing_0429_30hz_horizon${horizon} \
     logging.mode=online \
@@ -20,7 +20,7 @@ CUDA_VISIBLE_DEVICES=7 accelerate launch train.py \
     +policy.image_downsample_ratio=1 \
     n_obs_steps=${n_obs_steps} \
     logging.project="diffusion_policy_rdp_for_sys" \
-    logging.id="train_flexiv_clothing_3_packing_0429_dp_horizon48" \
+    logging.id="train_flexiv_clothing_3_packing_0429_dp_horizon48_" \
     training.num_epochs=${num_epochs} 
 
     #training.num_epochs=1000 \
