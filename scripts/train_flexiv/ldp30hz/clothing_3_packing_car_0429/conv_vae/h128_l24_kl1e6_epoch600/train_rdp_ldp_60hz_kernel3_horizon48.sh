@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-GPU_ID=${GPU_ID:-0}
+GPU_ID=${GPU_ID:-3}
 horizon=${horizon:-48}
 num_epochs=${num_epochs:-400}
 
@@ -10,7 +10,7 @@ TASK_NAME="wipe"
 DATASET_PATH=${DATASET_PATH:-"/mnt/data/kywang/4090_env/projects/efficient_robot_sys/data/ckpts/flexiv_clothing_3_packing_0429_30hz/rdp_zarr"}
 LOGGING_MODE=${LOGGING_MODE:-"online"}
 
-VAE_CONFIG_NAME="h128_l24_kl1e6_epoch300"
+VAE_CONFIG_NAME="h128_l24_kl1e6_epoch600"
 VAE_CKPT_ROOT=${VAE_CKPT_ROOT:-"/mnt/data/kywang/4090_env/projects/efficient_robot_sys/data/ckpts/flexiv_clothing_3_packing_0429_30hz/ckpts_abs/conv_vae/n_embed_20"}
 AT_LOAD_DIR=${AT_LOAD_DIR:-"${VAE_CKPT_ROOT}/${VAE_CONFIG_NAME}/latest.ckpt"}
 

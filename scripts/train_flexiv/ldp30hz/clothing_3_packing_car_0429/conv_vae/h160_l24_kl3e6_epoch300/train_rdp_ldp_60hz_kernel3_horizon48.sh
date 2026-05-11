@@ -10,17 +10,17 @@ TASK_NAME="wipe"
 DATASET_PATH=${DATASET_PATH:-"/mnt/data/kywang/4090_env/projects/efficient_robot_sys/data/ckpts/flexiv_clothing_3_packing_0429_30hz/rdp_zarr"}
 LOGGING_MODE=${LOGGING_MODE:-"online"}
 
-VAE_CONFIG_NAME="h128_l24_kl1e6_epoch300"
+VAE_CONFIG_NAME="h160_l24_kl3e6_epoch300"
 VAE_CKPT_ROOT=${VAE_CKPT_ROOT:-"/mnt/data/kywang/4090_env/projects/efficient_robot_sys/data/ckpts/flexiv_clothing_3_packing_0429_30hz/ckpts_abs/conv_vae/n_embed_20"}
 AT_LOAD_DIR=${AT_LOAD_DIR:-"${VAE_CKPT_ROOT}/${VAE_CONFIG_NAME}/latest.ckpt"}
 
-hidden_dim=128
+hidden_dim=160
 n_latent_dims=24
 n_embed=20
 downsample_factor=2
 blocks_per_level=3
 vae_kernel_size=5
-kl_multiplier=1e-6
+kl_multiplier=3e-6
 policy_kernel_size=3
 
 TIMESTAMP=${TIMESTAMP:-"cloth0429_ldp_tconv_${VAE_CONFIG_NAME}_h${horizon}"}
