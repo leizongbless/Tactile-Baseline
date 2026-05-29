@@ -1,7 +1,52 @@
-"""
-python scripts/process_data_flexiv/visualize_flexiv_zarr_dataset.py   --dataset_path /mnt/data/kywang/visual_tactile/flexiv_dataset/Flexiv_pass_car_0429   --num_trajectories 5 --max_video_frames -1
+"""Unified Flexiv release HDF5 -> Zarr converter.
+
+This single entry point supersedes the previous pair of scripts:
+  - process_data_flexiv_zarr.py            (single-arm, with gripper)
+  - process_data_flexiv_double_arm_zarr.py (dual-arm, with gripper)
+
+Behavior is now toggled by flags:
+  --dual_arm / --no-dual_arm
+  --with_gripper / --no-with_gripper
+  --raw_quat_order {wxyz, xyzw}   (REQUIRED; see below)
+  --output_suffix <str>           (e.g. "corrected" so new outputs don't
+                                   overwrite previously generated data)
+
+The quaternion-order flag is mandatory because the Flexiv release HDF5
+files do NOT all share the same on-disk layout: see the profile in
+  third_party/Tactile-Baseline/scripts/process_data_flexiv/四元数排列.md
+  docs/flexiv_RT/agents/04-quat-layout-fix/profile_flexiv_release_quat_order.py
+Briefly: `Flexiv_pass_car_0429` stores `[qw, qx, qy, qz]` (matches the
+on-arm RDK `state.tcp_pose` layout), while every other task in the
+release stores `[qx, qy, qz, qw]`. scipy `Rotation.from_quat` expects
+xyzw, so we cyclically shift wxyz inputs before constructing rotations.
+
+Examples
+--------
+Single-arm, pass_car (raw HDF5 is wxyz):
+  python process_data_flexiv_zarr.py \\
+      --root_path /mnt/data/data/ymm/dataset/Flexiv/release \\
+      --save_path /mnt/data/kywang/visual_tactile/flexiv_dataset \\
+      --task_list Flexiv_pass_car_0429 \\
+      --target_fps 30 \\
+      --camera_name ldl_hand_fisheye \\
+      --arm left \\
+      --raw_quat_order wxyz \\
+      --output_suffix corrected
+
+Dual-arm, clothing packing (raw HDF5 is xyzw):
+  python process_data_flexiv_zarr.py \\
+      --root_path /mnt/data/data/ymm/dataset/Flexiv/release \\
+      --save_path /mnt/data/kywang/visual_tactile/flexiv_dataset \\
+      --task_list Flexiv_clothing_3_packing_0429 \\
+      --target_fps 30 \\
+      --dual_arm \\
+      --left_camera_name ldl_hand_fisheye \\
+      --right_camera_name rdl_hand_fisheye \\
+      --raw_quat_order xyzw \\
+      --output_suffix corrected
 """
 
+from __future__ import annotations
 
 import argparse
 import os
@@ -15,6 +60,59 @@ import h5py
 import numpy as np
 import tqdm
 from scipy.spatial.transform import Rotation as R
+
+
+# ----------------------------------------------------------------------------
+# Quaternion handling
+# ----------------------------------------------------------------------------
+
+VALID_QUAT_ORDERS = ("wxyz", "xyzw")
+
+
+def normalize_quat_order(value: str) -> str:
+    if value is None:
+        raise ValueError("--raw_quat_order is required")
+    value = value.strip().lower()
+    if value not in VALID_QUAT_ORDERS:
+        raise ValueError(
+            f"--raw_quat_order must be one of {VALID_QUAT_ORDERS}, got '{value}'"
+        )
+    return value
+
+
+def raw_quat_to_xyzw(quat_raw: np.ndarray, raw_order: str) -> np.ndarray:
+    """Convert the raw 4-vec slot into the xyzw layout that scipy expects.
+
+    quat_raw: shape (..., 4) array with raw HDF5 byte order.
+    raw_order: 'wxyz' or 'xyzw'.
+    """
+    quat_raw = np.asarray(quat_raw, dtype=np.float32)
+    if raw_order == "xyzw":
+        return quat_raw
+    # raw_order == "wxyz"  ->  reorder slots to xyzw
+    return np.stack(
+        [quat_raw[..., 1], quat_raw[..., 2], quat_raw[..., 3], quat_raw[..., 0]],
+        axis=-1,
+    )
+
+
+def pose_quat_to_tcp_pose_9d(
+    pose: np.ndarray, raw_order: str, position_scale: float = 1.0
+) -> np.ndarray:
+    """Convert raw 7-vec pose [xyz, quat(raw_order)] to 9D [xyz, 6D rot]."""
+    pose = np.asarray(pose, dtype=np.float32)
+    position = pose[:, :3] * float(position_scale)
+    quat_xyzw = raw_quat_to_xyzw(pose[:, 3:7], raw_order=raw_order)
+    quat_norm = np.linalg.norm(quat_xyzw, axis=1, keepdims=True)
+    quat_xyzw = quat_xyzw / np.clip(quat_norm, 1e-8, None)
+    rot_mats = R.from_quat(quat_xyzw).as_matrix()
+    rot6d = np.concatenate([rot_mats[:, :, 0], rot_mats[:, :, 1]], axis=1)
+    return np.concatenate([position, rot6d.astype(np.float32)], axis=1)
+
+
+# ----------------------------------------------------------------------------
+# Generic Zarr / HDF5 helpers (unchanged from the original single-arm script)
+# ----------------------------------------------------------------------------
 
 
 def append_to_zarr_dataset(dataset, batch):
@@ -78,17 +176,6 @@ def get_aligned_indices(h5_file, map_path, camera_indices, camera_timestamps, so
     return nearest_indices(camera_timestamps[camera_indices], source_timestamps)
 
 
-def pose_quat_to_tcp_pose_9d(pose, position_scale=1.0):
-    pose = np.asarray(pose, dtype=np.float32)
-    position = pose[:, :3] * float(position_scale)
-    quat = pose[:, 3:7]
-    quat_norm = np.linalg.norm(quat, axis=1, keepdims=True)
-    quat = quat / np.clip(quat_norm, 1e-8, None)
-    rot_mats = R.from_quat(quat).as_matrix()
-    rot6d = np.concatenate([rot_mats[:, :, 0], rot_mats[:, :, 1]], axis=1)
-    return np.concatenate([position, rot6d.astype(np.float32)], axis=1)
-
-
 def decode_hdf5_path(value):
     if isinstance(value, bytes):
         return value.decode("utf-8")
@@ -105,6 +192,24 @@ def load_and_resize_image(image_path, image_size):
             image_bgr, (width, height), interpolation=cv2.INTER_AREA
         )
     return image_bgr[..., ::-1]
+
+
+def find_start_end_by_abs_zdiff(abs_z_diff, z_diff_thresh, end_extra_frames, num_frames):
+    start_candidates = np.where(abs_z_diff > z_diff_thresh)[0]
+    start_frame = 0 if len(start_candidates) == 0 else int(start_candidates[0])
+
+    rev_candidates = np.where(abs_z_diff[::-1] > z_diff_thresh)[0]
+    if len(rev_candidates) == 0:
+        end_frame = num_frames
+    else:
+        last_diff_idx = len(abs_z_diff) - 1 - int(rev_candidates[0])
+        end_frame = last_diff_idx + 1 + int(end_extra_frames)
+        end_frame = min(end_frame, num_frames)
+
+    if end_frame <= start_frame:
+        end_frame = min(num_frames, start_frame + 1)
+
+    return start_frame, end_frame
 
 
 def find_start_end_by_zdiff(states_arrays, z_diff_thresh, end_extra_frames):
@@ -136,132 +241,6 @@ def find_start_end_by_multi_zdiff(states_arrays_list, z_diff_thresh, end_extra_f
     )
 
 
-def find_start_end_by_abs_zdiff(abs_z_diff, z_diff_thresh, end_extra_frames, num_frames):
-    start_candidates = np.where(abs_z_diff > z_diff_thresh)[0]
-    if len(start_candidates) == 0:
-        start_frame = 0
-    else:
-        start_frame = int(start_candidates[0])
-
-    rev_candidates = np.where(abs_z_diff[::-1] > z_diff_thresh)[0]
-    if len(rev_candidates) == 0:
-        end_frame = num_frames
-    else:
-        last_diff_idx = len(abs_z_diff) - 1 - int(rev_candidates[0])
-        end_frame = last_diff_idx + 1 + int(end_extra_frames)
-        end_frame = min(end_frame, num_frames)
-
-    if end_frame <= start_frame:
-        end_frame = min(num_frames, start_frame + 1)
-
-    return start_frame, end_frame
-
-
-def process_one_episode(
-    episode_path,
-    camera_name,
-    arm,
-    target_fps,
-    image_size,
-    position_scale,
-    start_z_diff_thresh,
-    end_extra_frames,
-    max_frames_per_episode=-1,
-):
-    hdf5_path = episode_path / "dataset.hdf5"
-    if not hdf5_path.is_file():
-        raise FileNotFoundError(f"Missing dataset.hdf5: {hdf5_path}")
-
-    with h5py.File(hdf5_path, "r") as h5_file:
-        camera_path = f"observation/camera/{camera_name}"
-        pose_path = f"action/{arm}_eef/feedback/pose"
-        gripper_path = f"action/{arm}_eef/feedback/gripper"
-
-        for required_path in [camera_path, pose_path, gripper_path]:
-            if required_path not in h5_file:
-                raise KeyError(f"Missing HDF5 key {required_path} in {hdf5_path}")
-
-        camera_ds = h5_file[camera_path]
-        pose_ds = h5_file[pose_path]
-        gripper_ds = h5_file[gripper_path]
-
-        camera_timestamps = np.asarray(camera_ds["timestamp"], dtype=np.float64)
-        pose_timestamps = np.asarray(pose_ds["timestamp"], dtype=np.float64)
-        gripper_timestamps = np.asarray(gripper_ds["timestamp"], dtype=np.float64)
-
-        camera_indices = select_indices_by_fps(camera_timestamps, target_fps)
-        if max_frames_per_episode > 0:
-            camera_indices = camera_indices[:max_frames_per_episode]
-        if len(camera_indices) == 0:
-            raise ValueError(f"No frames selected for {episode_path}")
-
-        pose_indices = get_aligned_indices(
-            h5_file,
-            f"meta/index_map/action/{arm}_eef/feedback/pose",
-            camera_indices,
-            camera_timestamps,
-            pose_timestamps,
-        )
-        gripper_indices = get_aligned_indices(
-            h5_file,
-            f"meta/index_map/action/{arm}_eef/feedback/gripper",
-            camera_indices,
-            camera_timestamps,
-            gripper_timestamps,
-        )
-
-        camera_records = camera_ds[camera_indices]
-        pose_records = pose_ds[pose_indices]
-        gripper_records = gripper_ds[gripper_indices]
-
-        image_paths = [
-            episode_path / decode_hdf5_path(file_path)
-            for file_path in camera_records["file_path"]
-        ]
-        tcp_pose = pose_quat_to_tcp_pose_9d(
-            pose_records["value"], position_scale=position_scale
-        )
-        gripper = np.asarray(gripper_records["value"], dtype=np.float32)[:, None]
-
-        start_frame, end_frame = find_start_end_by_zdiff(
-            tcp_pose,
-            z_diff_thresh=start_z_diff_thresh,
-            end_extra_frames=end_extra_frames,
-        )
-        print(
-            f"[target_fps={target_fps}] start: {start_frame}, end: {end_frame}, "
-            f"raw_frames={len(tcp_pose)}, start_z_diff_thresh={start_z_diff_thresh}, "
-            f"end_extra_frames={end_extra_frames}"
-        )
-
-        tcp_pose = tcp_pose[start_frame:end_frame]
-        gripper = gripper[start_frame:end_frame]
-        image_paths = image_paths[start_frame:end_frame]
-        selected_camera_timestamps = camera_timestamps[camera_indices][start_frame:end_frame]
-
-        state_with_gripper = np.concatenate([tcp_pose, gripper], axis=1)
-        if len(state_with_gripper) > 1:
-            action = np.concatenate(
-                [state_with_gripper[1:], state_with_gripper[-1:]],
-                axis=0,
-            )
-        else:
-            action = state_with_gripper.copy()
-
-        return {
-            "left_robot_tcp_pose": tcp_pose.astype(np.float32, copy=False),
-            "left_robot_gripper_width": gripper.astype(np.float32, copy=False),
-            "action": action.astype(np.float32, copy=False),
-            "image_paths": image_paths,
-            "camera_timestamps": selected_camera_timestamps,
-            "source_fps": estimate_fps(camera_timestamps),
-            "image_size": image_size,
-            "start_frame": start_frame,
-            "end_frame": end_frame,
-            "raw_frame_count": len(camera_indices),
-        }
-
-
 def append_images_from_paths(dataset, image_paths, image_size, batch_size=128, num_workers=1):
     width, height = image_size
     prev_len = dataset.shape[0]
@@ -290,7 +269,316 @@ def append_images_from_paths(dataset, image_paths, image_size, batch_size=128, n
             dataset[prev_len + start:prev_len + end] = batch
 
 
-def resolve_episode_list(root_path, task_list, episode_length):
+# ----------------------------------------------------------------------------
+# Arm / camera readers
+# ----------------------------------------------------------------------------
+
+
+def read_arm_records(
+    h5_file,
+    arm: str,
+    main_indices: np.ndarray,
+    main_timestamps: np.ndarray,
+    raw_quat_order: str,
+    position_scale: float,
+    with_gripper: bool,
+):
+    """Return (tcp_pose_9d, gripper_or_none) aligned to main_indices."""
+    pose_path = f"action/{arm}_eef/feedback/pose"
+    if pose_path not in h5_file:
+        raise KeyError(f"Missing HDF5 key {pose_path}")
+
+    pose_ds = h5_file[pose_path]
+    pose_timestamps = np.asarray(pose_ds["timestamp"], dtype=np.float64)
+    pose_indices = get_aligned_indices(
+        h5_file,
+        f"meta/index_map/action/{arm}_eef/feedback/pose",
+        main_indices,
+        main_timestamps,
+        pose_timestamps,
+    )
+    tcp_pose = pose_quat_to_tcp_pose_9d(
+        pose_ds[pose_indices]["value"],
+        raw_order=raw_quat_order,
+        position_scale=position_scale,
+    ).astype(np.float32, copy=False)
+
+    gripper = None
+    if with_gripper:
+        gripper_path = f"action/{arm}_eef/feedback/gripper"
+        if gripper_path not in h5_file:
+            raise KeyError(f"Missing HDF5 key {gripper_path}")
+        gripper_ds = h5_file[gripper_path]
+        gripper_timestamps = np.asarray(gripper_ds["timestamp"], dtype=np.float64)
+        gripper_indices = get_aligned_indices(
+            h5_file,
+            f"meta/index_map/action/{arm}_eef/feedback/gripper",
+            main_indices,
+            main_timestamps,
+            gripper_timestamps,
+        )
+        gripper = (
+            np.asarray(gripper_ds[gripper_indices]["value"], dtype=np.float32)[:, None]
+        )
+
+    return tcp_pose, gripper
+
+
+def read_camera_image_paths(
+    h5_file,
+    episode_path: Path,
+    camera_name: str,
+    main_indices: np.ndarray,
+    main_timestamps: np.ndarray,
+    align_main: bool,
+):
+    """Return list of absolute image paths aligned to main_indices.
+
+    If align_main is True, the camera's records are taken at main_indices
+    directly (the "main" camera). Otherwise we resolve cross-stream alignment
+    through meta/index_map (or nearest-timestamp fallback).
+    """
+    camera_path = f"observation/camera/{camera_name}"
+    if camera_path not in h5_file:
+        raise KeyError(f"Missing HDF5 key {camera_path}")
+    camera_ds = h5_file[camera_path]
+    camera_timestamps = np.asarray(camera_ds["timestamp"], dtype=np.float64)
+
+    if align_main:
+        camera_indices = main_indices
+    else:
+        camera_indices = get_aligned_indices(
+            h5_file,
+            f"meta/index_map/observation/camera/{camera_name}",
+            main_indices,
+            main_timestamps,
+            camera_timestamps,
+        )
+
+    camera_records = camera_ds[camera_indices]
+    paths = [
+        episode_path / decode_hdf5_path(file_path)
+        for file_path in camera_records["file_path"]
+    ]
+    return paths, camera_indices, camera_timestamps
+
+
+def build_next_step_action(tcp_pose: np.ndarray, gripper: np.ndarray | None) -> np.ndarray:
+    state = tcp_pose if gripper is None else np.concatenate([tcp_pose, gripper], axis=1)
+    if len(state) > 1:
+        action = np.concatenate([state[1:], state[-1:]], axis=0)
+    else:
+        action = state.copy()
+    return action.astype(np.float32, copy=False)
+
+
+# ----------------------------------------------------------------------------
+# Episode-level processing (single vs dual arm)
+# ----------------------------------------------------------------------------
+
+
+def process_one_episode_single(
+    episode_path: Path,
+    camera_name: str,
+    arm: str,
+    target_fps: float,
+    image_size,
+    raw_quat_order: str,
+    with_gripper: bool,
+    position_scale: float,
+    start_z_diff_thresh: float,
+    end_extra_frames: int,
+    max_frames_per_episode: int = -1,
+):
+    hdf5_path = episode_path / "dataset.hdf5"
+    if not hdf5_path.is_file():
+        raise FileNotFoundError(f"Missing dataset.hdf5: {hdf5_path}")
+
+    with h5py.File(hdf5_path, "r") as h5_file:
+        camera_path = f"observation/camera/{camera_name}"
+        if camera_path not in h5_file:
+            raise KeyError(f"Missing HDF5 key {camera_path} in {hdf5_path}")
+
+        camera_ds = h5_file[camera_path]
+        camera_timestamps = np.asarray(camera_ds["timestamp"], dtype=np.float64)
+
+        camera_indices = select_indices_by_fps(camera_timestamps, target_fps)
+        if max_frames_per_episode > 0:
+            camera_indices = camera_indices[:max_frames_per_episode]
+        if len(camera_indices) == 0:
+            raise ValueError(f"No frames selected for {episode_path}")
+
+        tcp_pose, gripper = read_arm_records(
+            h5_file,
+            arm=arm,
+            main_indices=camera_indices,
+            main_timestamps=camera_timestamps,
+            raw_quat_order=raw_quat_order,
+            position_scale=position_scale,
+            with_gripper=with_gripper,
+        )
+
+        camera_records = camera_ds[camera_indices]
+        image_paths = [
+            episode_path / decode_hdf5_path(file_path)
+            for file_path in camera_records["file_path"]
+        ]
+
+        start_frame, end_frame = find_start_end_by_zdiff(
+            tcp_pose,
+            z_diff_thresh=start_z_diff_thresh,
+            end_extra_frames=end_extra_frames,
+        )
+        print(
+            f"[target_fps={target_fps}] start: {start_frame}, end: {end_frame}, "
+            f"raw_frames={len(tcp_pose)}, start_z_diff_thresh={start_z_diff_thresh}, "
+            f"end_extra_frames={end_extra_frames}"
+        )
+
+        tcp_pose = tcp_pose[start_frame:end_frame]
+        if gripper is not None:
+            gripper = gripper[start_frame:end_frame]
+        image_paths = image_paths[start_frame:end_frame]
+        selected_camera_timestamps = camera_timestamps[camera_indices][start_frame:end_frame]
+
+        action = build_next_step_action(tcp_pose, gripper)
+
+        return {
+            "left_robot_tcp_pose": tcp_pose,
+            "left_robot_gripper_width": gripper,
+            "action": action,
+            "image_paths": image_paths,
+            "camera_timestamps": selected_camera_timestamps,
+            "source_fps": estimate_fps(camera_timestamps),
+            "image_size": image_size,
+            "start_frame": start_frame,
+            "end_frame": end_frame,
+            "raw_frame_count": len(camera_indices),
+        }
+
+
+def process_one_episode_dual(
+    episode_path: Path,
+    left_camera_name: str,
+    right_camera_name: str,
+    target_fps: float,
+    raw_quat_order: str,
+    with_gripper: bool,
+    position_scale: float,
+    start_z_diff_thresh: float,
+    end_extra_frames: int,
+    max_frames_per_episode: int = -1,
+):
+    hdf5_path = episode_path / "dataset.hdf5"
+    if not hdf5_path.is_file():
+        raise FileNotFoundError(f"Missing dataset.hdf5: {hdf5_path}")
+
+    with h5py.File(hdf5_path, "r") as h5_file:
+        left_camera_path = f"observation/camera/{left_camera_name}"
+        if left_camera_path not in h5_file:
+            raise KeyError(f"Missing HDF5 key {left_camera_path} in {hdf5_path}")
+        left_camera_ds = h5_file[left_camera_path]
+        left_camera_timestamps = np.asarray(left_camera_ds["timestamp"], dtype=np.float64)
+
+        main_indices = select_indices_by_fps(left_camera_timestamps, target_fps)
+        if max_frames_per_episode > 0:
+            main_indices = main_indices[:max_frames_per_episode]
+        if len(main_indices) == 0:
+            raise ValueError(f"No frames selected for {episode_path}")
+
+        # right camera alignment
+        right_camera_path = f"observation/camera/{right_camera_name}"
+        if right_camera_path not in h5_file:
+            raise KeyError(f"Missing HDF5 key {right_camera_path} in {hdf5_path}")
+        right_camera_ds = h5_file[right_camera_path]
+        right_camera_timestamps = np.asarray(right_camera_ds["timestamp"], dtype=np.float64)
+        right_camera_indices = get_aligned_indices(
+            h5_file,
+            f"meta/index_map/observation/camera/{right_camera_name}",
+            main_indices,
+            left_camera_timestamps,
+            right_camera_timestamps,
+        )
+
+        left_tcp_pose, left_gripper = read_arm_records(
+            h5_file,
+            arm="left",
+            main_indices=main_indices,
+            main_timestamps=left_camera_timestamps,
+            raw_quat_order=raw_quat_order,
+            position_scale=position_scale,
+            with_gripper=with_gripper,
+        )
+        right_tcp_pose, right_gripper = read_arm_records(
+            h5_file,
+            arm="right",
+            main_indices=main_indices,
+            main_timestamps=left_camera_timestamps,
+            raw_quat_order=raw_quat_order,
+            position_scale=position_scale,
+            with_gripper=with_gripper,
+        )
+
+        start_frame, end_frame = find_start_end_by_multi_zdiff(
+            [left_tcp_pose, right_tcp_pose],
+            z_diff_thresh=start_z_diff_thresh,
+            end_extra_frames=end_extra_frames,
+        )
+        print(
+            f"[target_fps={target_fps}] start: {start_frame}, end: {end_frame}, "
+            f"raw_frames={len(left_tcp_pose)}, start_z_diff_thresh={start_z_diff_thresh}, "
+            f"end_extra_frames={end_extra_frames}"
+        )
+
+        left_tcp_pose = left_tcp_pose[start_frame:end_frame]
+        right_tcp_pose = right_tcp_pose[start_frame:end_frame]
+        if left_gripper is not None:
+            left_gripper = left_gripper[start_frame:end_frame]
+        if right_gripper is not None:
+            right_gripper = right_gripper[start_frame:end_frame]
+        main_indices = main_indices[start_frame:end_frame]
+        right_camera_indices = right_camera_indices[start_frame:end_frame]
+
+        left_action = build_next_step_action(left_tcp_pose, left_gripper)
+        right_action = build_next_step_action(right_tcp_pose, right_gripper)
+        action = np.concatenate([left_action, right_action], axis=1)
+
+        left_records = left_camera_ds[main_indices]
+        right_records = right_camera_ds[right_camera_indices]
+        left_image_paths = [
+            episode_path / decode_hdf5_path(file_path)
+            for file_path in left_records["file_path"]
+        ]
+        right_image_paths = [
+            episode_path / decode_hdf5_path(file_path)
+            for file_path in right_records["file_path"]
+        ]
+
+        return {
+            "left_robot_tcp_pose": left_tcp_pose,
+            "left_robot_gripper_width": left_gripper,
+            "right_robot_tcp_pose": right_tcp_pose,
+            "right_robot_gripper_width": right_gripper,
+            "action": action.astype(np.float32, copy=False),
+            "left_image_paths": left_image_paths,
+            "right_image_paths": right_image_paths,
+            "camera_timestamps": left_camera_timestamps[main_indices],
+            "source_fps": estimate_fps(left_camera_timestamps),
+            "start_frame": start_frame,
+            "end_frame": end_frame,
+            "raw_frame_count": len(left_camera_timestamps),
+        }
+
+
+# ----------------------------------------------------------------------------
+# Episode discovery
+# ----------------------------------------------------------------------------
+
+
+def resolve_episode_list(root_path, task_list, episode_length, recursive=True):
+    """Discover episodes under root_path/task. recursive=True for dual-arm
+    (matches old double_arm script), False for single-arm (matches old single).
+    """
     root_path = Path(root_path)
     episode_list = []
     resolved_tasks = []
@@ -302,12 +590,19 @@ def resolve_episode_list(root_path, task_list, episode_length):
         if not data_dir.is_dir():
             raise FileNotFoundError(f"Task directory does not exist: {data_dir}")
 
-        episodes = sorted(
-            path for path in data_dir.iterdir()
-            if path.is_dir() and (path / "dataset.hdf5").is_file()
-        )
-        if not episodes and (data_dir / "dataset.hdf5").is_file():
-            episodes = [data_dir]
+        if recursive:
+            episodes = sorted(
+                hdf5_path.parent
+                for hdf5_path in data_dir.rglob("dataset.hdf5")
+                if hdf5_path.is_file()
+            )
+        else:
+            episodes = sorted(
+                path for path in data_dir.iterdir()
+                if path.is_dir() and (path / "dataset.hdf5").is_file()
+            )
+            if not episodes and (data_dir / "dataset.hdf5").is_file():
+                episodes = [data_dir]
         if not episodes:
             raise ValueError(f"No Flexiv episodes found in {data_dir}")
 
@@ -321,6 +616,11 @@ def resolve_episode_list(root_path, task_list, episode_length):
     return episode_list, output_name
 
 
+# ----------------------------------------------------------------------------
+# README writer
+# ----------------------------------------------------------------------------
+
+
 def write_readme(save_data_path, args, total_frames, episode_ends, source_fps_values):
     source_fps_text = "unknown"
     if source_fps_values:
@@ -330,13 +630,70 @@ def write_readme(save_data_path, args, total_frames, episode_ends, source_fps_va
             f"max={np.max(source_fps_values):.6f} Hz"
         )
 
+    if args.dual_arm:
+        per_arm = 10 if args.with_gripper else 9
+        action_dim = 2 * per_arm
+        keys_block = [
+            "  data/left_wrist_img: uint8, shape=(N, H, W, 3), RGB image from left camera",
+            "  data/right_wrist_img: uint8, shape=(N, H, W, 3), RGB image from right camera",
+            "  data/left_robot_tcp_pose: float32, shape=(N, 9), left xyz position + 6D rotation",
+            "  data/right_robot_tcp_pose: float32, shape=(N, 9), right xyz position + 6D rotation",
+        ]
+        if args.with_gripper:
+            keys_block.append(
+                "  data/left_robot_gripper_width: float32, shape=(N, 1), left Flexiv gripper feedback value"
+            )
+            keys_block.append(
+                "  data/right_robot_gripper_width: float32, shape=(N, 1), right Flexiv gripper feedback value"
+            )
+        keys_block.append(
+            f"  data/action: float32, shape=(N, {action_dim}), next-step left then right arm state"
+        )
+        notes_block = [
+            f"  Each arm action is {per_arm}D ({'xyz + 6D rotation + gripper' if args.with_gripper else 'xyz + 6D rotation'}).",
+            f"  First {per_arm} action dims are left arm; last {per_arm} dims are right arm.",
+            "  start/end frames are trimmed by max(abs(diff(left_z)), abs(diff(right_z))).",
+        ]
+    else:
+        per_arm = 10 if args.with_gripper else 9
+        action_dim = per_arm
+        keys_block = [
+            f"  data/left_wrist_img: uint8, shape=(N, H, W, 3), RGB image from {args.camera_name[0] if isinstance(args.camera_name, list) else args.camera_name}",
+            "  data/left_robot_tcp_pose: float32, shape=(N, 9), xyz position + 6D rotation",
+        ]
+        if args.with_gripper:
+            keys_block.append(
+                "  data/left_robot_gripper_width: float32, shape=(N, 1), Flexiv gripper feedback value"
+            )
+        keys_block.append(
+            f"  data/action: float32, shape=(N, {action_dim}), next-step robot state"
+        )
+        notes_block = [
+            f"  Action is {per_arm}D ({'xyz + 6D rotation + gripper' if args.with_gripper else 'xyz + 6D rotation'}).",
+            "  start/end frames are trimmed by abs(diff(z)) above start_z_diff_thresh.",
+        ]
+
     lines = [
-        "Flexiv zarr dataset",
+        f"Flexiv zarr dataset ({'dual-arm' if args.dual_arm else 'single-arm'}; "
+        f"raw_quat_order={args.raw_quat_order}; with_gripper={args.with_gripper})",
         "",
         f"source_root: {args.root_path}",
         f"task_list: {', '.join(args.task_list)}",
-        f"camera_name: {args.camera_name}",
-        f"arm_source: {args.arm}",
+        f"raw_quat_order: {args.raw_quat_order}",
+        f"dual_arm: {args.dual_arm}",
+        f"with_gripper: {args.with_gripper}",
+    ]
+    if args.dual_arm:
+        lines.append(f"left_camera_name: {args.left_camera_name}")
+        lines.append(f"right_camera_name: {args.right_camera_name}")
+    else:
+        cam = args.camera_name
+        if isinstance(cam, list):
+            cam = cam[0]
+        lines.append(f"camera_name: {cam}")
+        lines.append(f"arm_source: {args.arm}")
+
+    lines += [
         f"target_fps: {args.target_fps} Hz",
         f"source_camera_fps: {source_fps_text}",
         f"start_z_diff_thresh: {args.start_z_diff_thresh}",
@@ -348,23 +705,86 @@ def write_readme(save_data_path, args, total_frames, episode_ends, source_fps_va
         "zarr_path: replay_buffer.zarr",
         "",
         "keys:",
-        "  data/left_wrist_img: uint8, shape=(N, H, W, 3), RGB image from ldl_hand_fisheye by default",
-        "  data/left_robot_tcp_pose: float32, shape=(N, 9), xyz position + 6D rotation",
-        "  data/left_robot_gripper_width: float32, shape=(N, 1), Flexiv gripper feedback value",
-        "  data/action: float32, shape=(N, 10), next-step left_robot_tcp_pose + gripper",
+    ]
+    lines += keys_block
+    lines += [
         "  meta/episode_ends: int64, shape=(num_episodes,), cumulative frame ends",
         "",
         "notes:",
+    ]
+    lines += notes_block
+    lines += [
         "  tactile keys are intentionally not stored.",
-        "  key names match the xarm dataset convention for image-only training configs.",
-        "  start/end frames are trimmed by detecting abs(diff(z)) above start_z_diff_thresh.",
+        "  Raw HDF5 quaternion layout per-task is enumerated in",
+        "    third_party/Tactile-Baseline/scripts/process_data_flexiv/四元数排列.md",
     ]
     readme_path = save_data_path / "readme.txt"
     readme_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
+# ----------------------------------------------------------------------------
+# Zarr dataset creation
+# ----------------------------------------------------------------------------
+
+
+def create_zarr_root(save_zarr_path, args):
+    import zarr
+
+    zarr_root = zarr.open_group(str(save_zarr_path), mode="w")
+    zarr_data = zarr_root.create_group("data", overwrite=True)
+    zarr_meta = zarr_root.create_group("meta", overwrite=True)
+    compressor = zarr.Blosc(cname="zstd", clevel=3, shuffle=1)
+
+    arms = ("left", "right") if args.dual_arm else ("left",)
+    per_arm = 10 if args.with_gripper else 9
+    action_dim = per_arm * len(arms)
+
+    ds = {}
+    for arm in arms:
+        ds[f"{arm}_tcp_pose"] = zarr_data.create_dataset(
+            f"{arm}_robot_tcp_pose",
+            shape=(0, 9),
+            chunks=(10000, 9),
+            dtype="float32",
+            overwrite=True,
+            compressor=compressor,
+        )
+        if args.with_gripper:
+            ds[f"{arm}_gripper"] = zarr_data.create_dataset(
+                f"{arm}_robot_gripper_width",
+                shape=(0, 1),
+                chunks=(10000, 1),
+                dtype="float32",
+                overwrite=True,
+                compressor=compressor,
+            )
+        ds[f"{arm}_img"] = zarr_data.create_dataset(
+            f"{arm}_wrist_img",
+            shape=(0, args.image_height, args.image_width, 3),
+            chunks=(100, args.image_height, args.image_width, 3),
+            dtype="uint8",
+            overwrite=True,
+        )
+
+    ds["action"] = zarr_data.create_dataset(
+        "action",
+        shape=(0, action_dim),
+        chunks=(10000, action_dim),
+        dtype="float32",
+        overwrite=True,
+        compressor=compressor,
+    )
+
+    return zarr_root, zarr_data, zarr_meta, compressor, ds
+
+
+# ----------------------------------------------------------------------------
+# Main
+# ----------------------------------------------------------------------------
+
+
 def main():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument(
         "--root_path",
         type=str,
@@ -381,12 +801,60 @@ def main():
         "--task_list",
         nargs="+",
         type=str,
-        default=["Flexiv_pass_car_0429"],
+        required=True,
         help="Flexiv task folder names under root_path.",
     )
+    parser.add_argument(
+        "--raw_quat_order",
+        type=str,
+        required=True,
+        choices=VALID_QUAT_ORDERS,
+        help="Layout of the 4-slot quaternion stored in this task's HDF5 (wxyz or xyzw). "
+             "scipy expects xyzw; if 'wxyz' is passed, slots are reordered before "
+             "scipy Rotation.from_quat. See 四元数排列.md.",
+    )
+    parser.add_argument(
+        "--dual_arm",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="If set, read both left and right arms and write a dual-arm zarr.",
+    )
+    parser.add_argument(
+        "--with_gripper",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="If set, include gripper feedback in state/action and as a zarr dataset.",
+    )
+
     parser.add_argument("--target_fps", type=float, default=30.0)
-    parser.add_argument("--camera_name", type=str, default="ldl_hand_fisheye")
-    parser.add_argument("--arm", type=str, default="left", choices=["left", "right"])
+    parser.add_argument(
+        "--camera_name",
+        nargs="+",
+        type=str,
+        default=None,
+        help="Single-arm: one camera name. Dual-arm shorthand: two camera names "
+             "(left first, then right).",
+    )
+    parser.add_argument(
+        "--left_camera_name",
+        type=str,
+        default="ldl_hand_fisheye",
+        help="Camera name for the left arm in dual-arm mode (or the only camera "
+             "in single-arm mode if --arm left).",
+    )
+    parser.add_argument(
+        "--right_camera_name",
+        type=str,
+        default="rdl_hand_fisheye",
+        help="Camera name for the right arm in dual-arm mode.",
+    )
+    parser.add_argument(
+        "--arm",
+        type=str,
+        default="left",
+        choices=["left", "right"],
+        help="Single-arm mode only: which arm to read.",
+    )
     parser.add_argument("--episode_length", type=int, default=-1)
     parser.add_argument("--image_width", type=int, default=320)
     parser.add_argument("--image_height", type=int, default=240)
@@ -409,6 +877,13 @@ def main():
         default=-1,
         help="Debug option. -1 means keep all selected frames.",
     )
+    parser.add_argument(
+        "--output_suffix",
+        type=str,
+        default="",
+        help="If non-empty, append '_<suffix>' to the output task folder name "
+             "(e.g. 'corrected' so new outputs do not overwrite previous data).",
+    )
     parser.add_argument("--image_batch_size", type=int, default=128)
     parser.add_argument("--image_num_workers", type=int, default=8)
     parser.add_argument("--stage_in_tmpfs", action=argparse.BooleanOptionalAction, default=True)
@@ -421,8 +896,29 @@ def main():
     parser.add_argument("--profile_timing", action=argparse.BooleanOptionalAction, default=True)
     args = parser.parse_args()
 
+    # Camera-name normalization.
+    if args.dual_arm:
+        if args.camera_name is not None:
+            if len(args.camera_name) != 2:
+                raise ValueError(
+                    "--camera_name in dual-arm mode expects exactly 2 values: "
+                    "<left> <right>"
+                )
+            args.left_camera_name = args.camera_name[0]
+            args.right_camera_name = args.camera_name[1]
+    else:
+        if args.camera_name is not None:
+            if len(args.camera_name) != 1:
+                raise ValueError(
+                    "--camera_name in single-arm mode expects exactly 1 value"
+                )
+        else:
+            args.camera_name = [args.left_camera_name]
+
+    args.raw_quat_order = normalize_quat_order(args.raw_quat_order)
+
     try:
-        import zarr
+        import zarr  # noqa: F401
     except ImportError as exc:
         raise ImportError(
             "The Flexiv converter requires zarr. Please run it in the same "
@@ -431,8 +927,16 @@ def main():
         ) from exc
 
     episode_list, output_name = resolve_episode_list(
-        args.root_path, args.task_list, args.episode_length
+        args.root_path,
+        args.task_list,
+        args.episode_length,
+        recursive=True,  # always recursive — matches old double_arm script and
+                          # still works for single-arm (release task layouts
+                          # are 1 or 2 levels deep).
     )
+    if args.output_suffix:
+        output_name = f"{output_name}_{args.output_suffix}"
+
     final_save_data_path = Path(args.save_path) / output_name
     if args.stage_in_tmpfs:
         save_data_path = Path(args.tmpfs_root) / f"{output_name}_{os.getpid()}"
@@ -446,52 +950,25 @@ def main():
     print("Flexiv processing settings:")
     print(f"  root_path: {args.root_path}")
     print(f"  task_list: {args.task_list}")
+    print(f"  dual_arm: {args.dual_arm}")
+    print(f"  with_gripper: {args.with_gripper}")
+    print(f"  raw_quat_order: {args.raw_quat_order}")
+    print(f"  output_suffix: '{args.output_suffix}'")
     print(f"  final_save_data_path: {final_save_data_path}")
     print(f"  staging_save_data_path: {save_data_path}")
     print(f"  save_zarr_path: {save_zarr_path}")
     print(f"  target_fps: {args.target_fps}")
-    print(f"  camera_name: {args.camera_name}")
-    print(f"  arm: {args.arm}")
+    if args.dual_arm:
+        print(f"  left_camera_name: {args.left_camera_name}")
+        print(f"  right_camera_name: {args.right_camera_name}")
+    else:
+        print(f"  camera_name: {args.camera_name[0]}")
+        print(f"  arm: {args.arm}")
     print(f"  image_num_workers: {args.image_num_workers}")
     print(f"  stage_in_tmpfs: {args.stage_in_tmpfs}")
     print(f"  episode_count: {len(episode_list)}")
 
-    zarr_root = zarr.open_group(str(save_zarr_path), mode="w")
-    zarr_data = zarr_root.create_group("data", overwrite=True)
-    zarr_meta = zarr_root.create_group("meta", overwrite=True)
-    compressor = zarr.Blosc(cname="zstd", clevel=3, shuffle=1)
-
-    left_robot_tcp_pose_ds = zarr_data.create_dataset(
-        "left_robot_tcp_pose",
-        shape=(0, 9),
-        chunks=(10000, 9),
-        dtype="float32",
-        overwrite=True,
-        compressor=compressor,
-    )
-    left_robot_gripper_width_ds = zarr_data.create_dataset(
-        "left_robot_gripper_width",
-        shape=(0, 1),
-        chunks=(10000, 1),
-        dtype="float32",
-        overwrite=True,
-        compressor=compressor,
-    )
-    action_ds = zarr_data.create_dataset(
-        "action",
-        shape=(0, 10),
-        chunks=(10000, 10),
-        dtype="float32",
-        overwrite=True,
-        compressor=compressor,
-    )
-    left_wrist_img_ds = zarr_data.create_dataset(
-        "left_wrist_img",
-        shape=(0, args.image_height, args.image_width, 3),
-        chunks=(100, args.image_height, args.image_width, 3),
-        dtype="uint8",
-        overwrite=True,
-    )
+    zarr_root, zarr_data, zarr_meta, compressor, ds = create_zarr_root(save_zarr_path, args)
 
     episode_end_list = []
     source_fps_values = []
@@ -507,38 +984,74 @@ def main():
     for episode_path in tqdm.tqdm(episode_list):
         print(f"loading episode: {episode_path}")
         episode_start_t = time.perf_counter()
+
         t0 = time.perf_counter()
-        episode_data = process_one_episode(
-            episode_path=episode_path,
-            camera_name=args.camera_name,
-            arm=args.arm,
-            target_fps=args.target_fps,
-            image_size=(args.image_width, args.image_height),
-            position_scale=args.position_scale,
-            start_z_diff_thresh=args.start_z_diff_thresh,
-            end_extra_frames=args.end_extra_frames,
-            max_frames_per_episode=args.max_frames_per_episode,
-        )
+        if args.dual_arm:
+            episode_data = process_one_episode_dual(
+                episode_path=episode_path,
+                left_camera_name=args.left_camera_name,
+                right_camera_name=args.right_camera_name,
+                target_fps=args.target_fps,
+                raw_quat_order=args.raw_quat_order,
+                with_gripper=args.with_gripper,
+                position_scale=args.position_scale,
+                start_z_diff_thresh=args.start_z_diff_thresh,
+                end_extra_frames=args.end_extra_frames,
+                max_frames_per_episode=args.max_frames_per_episode,
+            )
+        else:
+            episode_data = process_one_episode_single(
+                episode_path=episode_path,
+                camera_name=args.camera_name[0],
+                arm=args.arm,
+                target_fps=args.target_fps,
+                image_size=(args.image_width, args.image_height),
+                raw_quat_order=args.raw_quat_order,
+                with_gripper=args.with_gripper,
+                position_scale=args.position_scale,
+                start_z_diff_thresh=args.start_z_diff_thresh,
+                end_extra_frames=args.end_extra_frames,
+                max_frames_per_episode=args.max_frames_per_episode,
+            )
         timing["process_episode_s"] += time.perf_counter() - t0
 
         t0 = time.perf_counter()
-        append_to_zarr_dataset(
-            left_robot_tcp_pose_ds, episode_data["left_robot_tcp_pose"]
-        )
-        append_to_zarr_dataset(
-            left_robot_gripper_width_ds, episode_data["left_robot_gripper_width"]
-        )
-        append_to_zarr_dataset(action_ds, episode_data["action"])
+        append_to_zarr_dataset(ds["left_tcp_pose"], episode_data["left_robot_tcp_pose"])
+        if args.with_gripper:
+            append_to_zarr_dataset(ds["left_gripper"], episode_data["left_robot_gripper_width"])
+        if args.dual_arm:
+            append_to_zarr_dataset(ds["right_tcp_pose"], episode_data["right_robot_tcp_pose"])
+            if args.with_gripper:
+                append_to_zarr_dataset(
+                    ds["right_gripper"], episode_data["right_robot_gripper_width"]
+                )
+        append_to_zarr_dataset(ds["action"], episode_data["action"])
         timing["append_lowdim_s"] += time.perf_counter() - t0
 
         t0 = time.perf_counter()
-        append_images_from_paths(
-            left_wrist_img_ds,
-            episode_data["image_paths"],
-            image_size=(args.image_width, args.image_height),
-            batch_size=args.image_batch_size,
-            num_workers=args.image_num_workers,
-        )
+        if args.dual_arm:
+            append_images_from_paths(
+                ds["left_img"],
+                episode_data["left_image_paths"],
+                image_size=(args.image_width, args.image_height),
+                batch_size=args.image_batch_size,
+                num_workers=args.image_num_workers,
+            )
+            append_images_from_paths(
+                ds["right_img"],
+                episode_data["right_image_paths"],
+                image_size=(args.image_width, args.image_height),
+                batch_size=args.image_batch_size,
+                num_workers=args.image_num_workers,
+            )
+        else:
+            append_images_from_paths(
+                ds["left_img"],
+                episode_data["image_paths"],
+                image_size=(args.image_width, args.image_height),
+                batch_size=args.image_batch_size,
+                num_workers=args.image_num_workers,
+            )
         timing["append_image_s"] += time.perf_counter() - t0
 
         total_frames += len(episode_data["action"])
@@ -566,11 +1079,21 @@ def main():
     )
 
     zarr_root.attrs["target_fps"] = float(args.target_fps)
-    zarr_root.attrs["camera_name"] = args.camera_name
-    zarr_root.attrs["arm_source"] = args.arm
+    zarr_root.attrs["raw_quat_order"] = args.raw_quat_order
+    zarr_root.attrs["dual_arm"] = bool(args.dual_arm)
+    zarr_root.attrs["with_gripper"] = bool(args.with_gripper)
+    if args.dual_arm:
+        zarr_root.attrs["left_camera_name"] = args.left_camera_name
+        zarr_root.attrs["right_camera_name"] = args.right_camera_name
+        zarr_root.attrs["arm_order"] = "left,right"
+    else:
+        zarr_root.attrs["camera_name"] = args.camera_name[0]
+        zarr_root.attrs["arm_source"] = args.arm
     zarr_root.attrs["start_z_diff_thresh"] = float(args.start_z_diff_thresh)
     zarr_root.attrs["end_extra_frames"] = int(args.end_extra_frames)
     zarr_root.attrs["total_frames"] = int(total_frames)
+    if args.output_suffix:
+        zarr_root.attrs["output_suffix"] = args.output_suffix
 
     write_readme(save_data_path, args, total_frames, episode_ends, source_fps_values)
 
@@ -585,7 +1108,10 @@ def main():
             shutil.rmtree(save_data_path)
 
     timing["total_s"] = time.perf_counter() - timing["total_s"]
-    print(f"Finished. Wrote {total_frames} frames to {final_save_data_path / 'replay_buffer.zarr'}")
+    print(
+        f"Finished. Wrote {total_frames} frames to "
+        f"{final_save_data_path / 'replay_buffer.zarr'}"
+    )
     print(f"Final dataset: {final_save_data_path}")
     print(f"Readme: {final_save_data_path / 'readme.txt'}")
     if args.profile_timing:

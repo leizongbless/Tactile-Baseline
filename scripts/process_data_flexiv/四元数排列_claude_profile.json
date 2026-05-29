@@ -1,0 +1,2424 @@
+[
+  {
+    "task": "Flexiv_breakfast_1_bowl_0429",
+    "episode_path": "/mnt/data/data/ymm/dataset/Flexiv/release/Flexiv_breakfast_1_bowl_0429/Flexiv\u51c6\u5907\u65e9\u9910-\u9996\u8f6e\u5bb9\u5668\u4e0e\u996e\u54c1\u653e\u7f6e/worldcode_Flexiv-B_2026-04-23-11-37-56_0",
+    "h5_root_attrs": {},
+    "pose_path": "action/left_eef/feedback/pose",
+    "arm_token": "left",
+    "pose_value_shape": [
+      793,
+      7
+    ],
+    "pose_value_dtype": "[('value', '<f4', (7,)), ('timestamp', '<f8')]",
+    "pose_group_attrs": {},
+    "pose_dataset_attrs": {},
+    "stats": {
+      "n_frames_total": 200,
+      "n_frames_scanned": 200,
+      "first_xyz": [
+        0.05501953512430191,
+        0.9119234085083008,
+        -0.22463957965373993
+      ],
+      "first_quat4": [
+        0.8468716740608215,
+        -0.4493972957134247,
+        0.06783797591924667,
+        -0.27613115310668945
+      ],
+      "quat_norm_mean": 1.000000000150265,
+      "quat_norm_std": 1.6656467413845667e-08,
+      "quat_norm_min": 0.9999999636557149,
+      "quat_norm_max": 1.00000003843839,
+      "median_abs_delta_q_per_step": 0.002324223518371582,
+      "median_abs_delta_xyz_per_step_mm": 1.4545917510986328,
+      "per_component": [
+        {
+          "slot": 0,
+          "min": -0.668334424495697,
+          "max": 0.8468716740608215,
+          "mean": 0.3966727024316788,
+          "std": 0.584796794789339,
+          "abs_mean": 0.7026174539327621
+        },
+        {
+          "slot": 1,
+          "min": -0.6705646514892578,
+          "max": 0.6790953278541565,
+          "mean": -0.24847855687141418,
+          "std": 0.5223725064156427,
+          "abs_mean": 0.5746455579996109
+        },
+        {
+          "slot": 2,
+          "min": -0.468802273273468,
+          "max": 0.49364522099494934,
+          "mean": -0.11705723008373753,
+          "std": 0.357016415751516,
+          "abs_mean": 0.3443749447748996
+        },
+        {
+          "slot": 3,
+          "min": -0.29462718963623047,
+          "max": 0.22955818474292755,
+          "mean": -0.05798132841657207,
+          "std": 0.1467102480757459,
+          "abs_mean": 0.1280497943553928
+        }
+      ]
+    },
+    "slot_pattern": {
+      "slot_with_max_abs": 3,
+      "slot_with_min_abs": 6,
+      "max_abs_value": 0.7026174539327621,
+      "min_abs_value": 0.1280497943553928,
+      "pattern": "max@3, min@6"
+    },
+    "cross_check_vs_pass_car": {
+      "max_abs_diff": {
+        "direct": 1.2902952957134248,
+        "shift_-1": 0.035541153106689455,
+        "shift_+1": 0.7856126740608216
+      },
+      "layout_blind_angle_deg": {
+        "direct": 101.72490400081516,
+        "shift_-1": 5.5364718503077786,
+        "shift_+1": 139.04588550632025
+      }
+    },
+    "verdict": {
+      "verdict": "LIKELY_XYZW_PERMUTED_shift_-1",
+      "confidence": "high",
+      "reason": "shift_-1 cyclic shift of pass_car's WXYZ ref is the closest layout-blind match (5.5\u00b0). slot-pattern=max@3, min@6. Conclusion: dataset was permuted at write time."
+    }
+  },
+  {
+    "task": "Flexiv_breakfast_2_plate_0429",
+    "episode_path": "/mnt/data/data/ymm/dataset/Flexiv/release/Flexiv_breakfast_2_plate_0429/Flexiv\u51c6\u5907\u65e9\u9910-\u6b21\u8f6e\u5bb9\u5668\u4e0e\u996e\u54c1\u653e\u7f6e/worldcode_Flexiv-B_2026-04-23-14-48-11_0",
+    "h5_root_attrs": {},
+    "pose_path": "action/left_eef/feedback/pose",
+    "arm_token": "left",
+    "pose_value_shape": [
+      849,
+      7
+    ],
+    "pose_value_dtype": "[('value', '<f4', (7,)), ('timestamp', '<f8')]",
+    "pose_group_attrs": {},
+    "pose_dataset_attrs": {},
+    "stats": {
+      "n_frames_total": 200,
+      "n_frames_scanned": 200,
+      "first_xyz": [
+        0.0754617229104042,
+        0.8961582183837891,
+        -0.20612084865570068
+      ],
+      "first_quat4": [
+        0.8015079498291016,
+        -0.5261396765708923,
+        0.037314727902412415,
+        -0.28172630071640015
+      ],
+      "quat_norm_mean": 1.0000000006301422,
+      "quat_norm_std": 1.628455686442314e-08,
+      "quat_norm_min": 0.9999999602162176,
+      "quat_norm_max": 1.000000033135094,
+      "median_abs_delta_q_per_step": 0.0012151002883911133,
+      "median_abs_delta_xyz_per_step_mm": 1.3692080974578857,
+      "per_component": [
+        {
+          "slot": 0,
+          "min": 0.694832444190979,
+          "max": 0.8015105128288269,
+          "mean": 0.7325551107525825,
+          "std": 0.03726758271507329,
+          "abs_mean": 0.7325551107525825
+        },
+        {
+          "slot": 1,
+          "min": -0.6091309189796448,
+          "max": -0.49517887830734253,
+          "mean": -0.5299247449636459,
+          "std": 0.02768437692670749,
+          "abs_mean": 0.5299247449636459
+        },
+        {
+          "slot": 2,
+          "min": -0.4933147430419922,
+          "max": 0.0390937514603138,
+          "mean": -0.3487914550269488,
+          "std": 0.20526633399034153,
+          "abs_mean": 0.360794551941799
+        },
+        {
+          "slot": 3,
+          "min": -0.28538545966148376,
+          "max": 0.013765938580036163,
+          "mean": -0.07502199623471824,
+          "std": 0.1047350529184643,
+          "abs_mean": 0.08050681746710325
+        }
+      ]
+    },
+    "slot_pattern": {
+      "slot_with_max_abs": 3,
+      "slot_with_min_abs": 6,
+      "max_abs_value": 0.7325551107525825,
+      "min_abs_value": 0.08050681746710325,
+      "pattern": "max@3, min@6"
+    },
+    "cross_check_vs_pass_car": {
+      "max_abs_diff": {
+        "direct": 1.3670376765708925,
+        "shift_-1": 0.04525067657089232,
+        "shift_+1": 0.8035832720975876
+      },
+      "layout_blind_angle_deg": {
+        "direct": 95.79374280152204,
+        "shift_-1": 8.777737246607971,
+        "shift_+1": 139.93653956247948
+      }
+    },
+    "verdict": {
+      "verdict": "LIKELY_XYZW_PERMUTED_shift_-1",
+      "confidence": "high",
+      "reason": "shift_-1 cyclic shift of pass_car's WXYZ ref is the closest layout-blind match (8.8\u00b0). slot-pattern=max@3, min@6. Conclusion: dataset was permuted at write time."
+    }
+  },
+  {
+    "task": "Flexiv_breakfast_3_pour_0429",
+    "episode_path": "/mnt/data/data/ymm/dataset/Flexiv/release/Flexiv_breakfast_3_pour_0429/Flexiv\u51c6\u5907\u65e9\u9910-\u6c34\u679c\u653e\u7f6e\u4e0e\u503e\u5012\u71d5\u9ea6/worldcode_Flexiv-B_2026-04-24-11-40-44_0",
+    "h5_root_attrs": {},
+    "pose_path": "action/left_eef/feedback/pose",
+    "arm_token": "left",
+    "pose_value_shape": [
+      1470,
+      7
+    ],
+    "pose_value_dtype": "[('value', '<f4', (7,)), ('timestamp', '<f8')]",
+    "pose_group_attrs": {},
+    "pose_dataset_attrs": {},
+    "stats": {
+      "n_frames_total": 200,
+      "n_frames_scanned": 200,
+      "first_xyz": [
+        0.05499785766005516,
+        0.9119226336479187,
+        -0.2246536910533905
+      ],
+      "first_quat4": [
+        0.8468867540359497,
+        -0.449384480714798,
+        0.06783296912908554,
+        -0.2761070728302002
+      ],
+      "quat_norm_mean": 1.000000001307821,
+      "quat_norm_std": 1.6921857493381672e-08,
+      "quat_norm_min": 0.9999999617158176,
+      "quat_norm_max": 1.0000000429804512,
+      "median_abs_delta_q_per_step": 0.00023452192544937134,
+      "median_abs_delta_xyz_per_step_mm": 0.2751201391220093,
+      "per_component": [
+        {
+          "slot": 0,
+          "min": -0.6460233330726624,
+          "max": 0.846889853477478,
+          "mean": -0.021194891631603242,
+          "std": 0.6949990002764896,
+          "abs_mean": 0.68554120272398
+        },
+        {
+          "slot": 1,
+          "min": -0.6527484655380249,
+          "max": 0.7048588991165161,
+          "mean": 0.22248639449477195,
+          "std": 0.5781894777732598,
+          "abs_mean": 0.608830847889185
+        },
+        {
+          "slot": 2,
+          "min": -0.10708241164684296,
+          "max": 0.06959261000156403,
+          "mean": -0.03463229931890965,
+          "std": 0.08259541743739145,
+          "abs_mean": 0.08744163289666176
+        },
+        {
+          "slot": 3,
+          "min": -0.3771149516105652,
+          "max": 0.3886164426803589,
+          "mean": 0.10887419939041137,
+          "std": 0.3359299189196672,
+          "abs_mean": 0.34978050023317336
+        }
+      ]
+    },
+    "slot_pattern": {
+      "slot_with_max_abs": 3,
+      "slot_with_min_abs": 5,
+      "max_abs_value": 0.68554120272398,
+      "min_abs_value": 0.08744163289666176,
+      "pattern": "max@3, min@5"
+    },
+    "cross_check_vs_pass_car": {
+      "max_abs_diff": {
+        "direct": 1.2902824807147981,
+        "shift_-1": 0.0355170728302002,
+        "shift_+1": 0.7856277540359498
+      },
+      "layout_blind_angle_deg": {
+        "direct": 101.72653585800239,
+        "shift_-1": 5.53553536435561,
+        "shift_+1": 139.04808209381363
+      }
+    },
+    "verdict": {
+      "verdict": "LIKELY_XYZW_PERMUTED_shift_-1",
+      "confidence": "high",
+      "reason": "shift_-1 cyclic shift of pass_car's WXYZ ref is the closest layout-blind match (5.5\u00b0). slot-pattern=max@3, min@5. Conclusion: dataset was permuted at write time."
+    }
+  },
+  {
+    "task": "Flexiv_breakfast_4_bread_0429",
+    "episode_path": "/mnt/data/data/ymm/dataset/Flexiv/release/Flexiv_breakfast_4_bread_0429/Flexiv\u51c6\u5907\u65e9\u9910-\u5269\u4f59\u98df\u7269\u88c5\u76d8/worldcode_Flexiv-B_2026-04-24-15-06-17_0",
+    "h5_root_attrs": {},
+    "pose_path": "action/left_eef/feedback/pose",
+    "arm_token": "left",
+    "pose_value_shape": [
+      1004,
+      7
+    ],
+    "pose_value_dtype": "[('value', '<f4', (7,)), ('timestamp', '<f8')]",
+    "pose_group_attrs": {},
+    "pose_dataset_attrs": {},
+    "stats": {
+      "n_frames_total": 200,
+      "n_frames_scanned": 200,
+      "first_xyz": [
+        0.054998546838760376,
+        0.911920964717865,
+        -0.2246522605419159
+      ],
+      "first_quat4": [
+        0.8468856811523438,
+        -0.4493843913078308,
+        0.0678325891494751,
+        -0.27611055970191956
+      ],
+      "quat_norm_mean": 0.999999999442035,
+      "quat_norm_std": 1.48702574578112e-08,
+      "quat_norm_min": 0.9999999642901075,
+      "quat_norm_max": 1.0000000357046819,
+      "median_abs_delta_q_per_step": 0.0004783123731613159,
+      "median_abs_delta_xyz_per_step_mm": 0.2572983503341675,
+      "per_component": [
+        {
+          "slot": 0,
+          "min": -0.6514629125595093,
+          "max": 0.8468865752220154,
+          "mean": -0.04350829571485519,
+          "std": 0.6493028563119562,
+          "abs_mean": 0.6345519933104515
+        },
+        {
+          "slot": 1,
+          "min": -0.6555852890014648,
+          "max": 0.7556619048118591,
+          "mean": 0.292770489603281,
+          "std": 0.5812181390120745,
+          "abs_mean": 0.6388334779441357
+        },
+        {
+          "slot": 2,
+          "min": -0.1795124113559723,
+          "max": 0.07224120199680328,
+          "mean": -0.07878640418872238,
+          "std": 0.1096990493913756,
+          "abs_mean": 0.12511195601895453
+        },
+        {
+          "slot": 3,
+          "min": -0.35873714089393616,
+          "max": 0.4243544936180115,
+          "mean": 0.15337017089128493,
+          "std": 0.33349685895433534,
+          "abs_mean": 0.36265413761138915
+        }
+      ]
+    },
+    "slot_pattern": {
+      "slot_with_max_abs": 4,
+      "slot_with_min_abs": 5,
+      "max_abs_value": 0.6388334779441357,
+      "min_abs_value": 0.12511195601895453,
+      "pattern": "max@4, min@5"
+    },
+    "cross_check_vs_pass_car": {
+      "max_abs_diff": {
+        "direct": 1.290282391307831,
+        "shift_-1": 0.03552055970191956,
+        "shift_+1": 0.7856266811523438
+      },
+      "layout_blind_angle_deg": {
+        "direct": 101.72657943772268,
+        "shift_-1": 5.535814806676905,
+        "shift_+1": 139.04792623744316
+      }
+    },
+    "verdict": {
+      "verdict": "LIKELY_XYZW_PERMUTED_shift_-1",
+      "confidence": "high",
+      "reason": "shift_-1 cyclic shift of pass_car's WXYZ ref is the closest layout-blind match (5.5\u00b0). slot-pattern=max@4, min@5. Conclusion: dataset was permuted at write time."
+    }
+  },
+  {
+    "task": "Flexiv_breakfast_4_bread_0514",
+    "episode_path": "/mnt/data/data/ymm/dataset/Flexiv/release/Flexiv_breakfast_4_bread_0514/Flexiv\u51c6\u5907\u65e9\u9910-\u5269\u4f59\u98df\u7269\u88c5\u76d8/worldcode_Flexiv-B_2026-05-14-13-22-28_0",
+    "h5_root_attrs": {},
+    "pose_path": "action/left_eef/feedback/pose",
+    "arm_token": "left",
+    "pose_value_shape": [
+      1274,
+      7
+    ],
+    "pose_value_dtype": "[('value', '<f4', (7,)), ('timestamp', '<f8')]",
+    "pose_group_attrs": {},
+    "pose_dataset_attrs": {},
+    "stats": {
+      "n_frames_total": 200,
+      "n_frames_scanned": 200,
+      "first_xyz": [
+        0.05498848482966423,
+        0.9119172096252441,
+        -0.2246718853712082
+      ],
+      "first_quat4": [
+        0.8468943238258362,
+        -0.44937893748283386,
+        0.0678337961435318,
+        -0.27609261870384216
+      ],
+      "quat_norm_mean": 1.0000000005211966,
+      "quat_norm_std": 1.670269373898653e-08,
+      "quat_norm_min": 0.9999999643509486,
+      "quat_norm_max": 1.0000000378257548,
+      "median_abs_delta_q_per_step": 0.00022786855697631836,
+      "median_abs_delta_xyz_per_step_mm": 0.23874640464782715,
+      "per_component": [
+        {
+          "slot": 0,
+          "min": -0.6694932579994202,
+          "max": 0.8468943238258362,
+          "mean": -0.09179960459470748,
+          "std": 0.6919270186629953,
+          "abs_mean": 0.6912872067093849
+        },
+        {
+          "slot": 1,
+          "min": -0.6707594394683838,
+          "max": 0.7174831032752991,
+          "mean": 0.2621560782194138,
+          "std": 0.5888311282827141,
+          "abs_mean": 0.6351178967952729
+        },
+        {
+          "slot": 2,
+          "min": -0.15251335501670837,
+          "max": 0.13754065334796906,
+          "mean": -0.06352789083495736,
+          "std": 0.11011848152092622,
+          "abs_mean": 0.12208334406837822
+        },
+        {
+          "slot": 3,
+          "min": -0.2795476019382477,
+          "max": 0.2957475781440735,
+          "mean": 0.0820413863658905,
+          "std": 0.272890574292078,
+          "abs_mean": 0.28480388700962067
+        }
+      ]
+    },
+    "slot_pattern": {
+      "slot_with_max_abs": 3,
+      "slot_with_min_abs": 5,
+      "max_abs_value": 0.6912872067093849,
+      "min_abs_value": 0.12208334406837822,
+      "pattern": "max@3, min@5"
+    },
+    "cross_check_vs_pass_car": {
+      "max_abs_diff": {
+        "direct": 1.290276937482834,
+        "shift_-1": 0.035502618703842165,
+        "shift_+1": 0.7856353238258362
+      },
+      "layout_blind_angle_deg": {
+        "direct": 101.72702610982341,
+        "shift_-1": 5.534852358734689,
+        "shift_+1": 139.0489530224499
+      }
+    },
+    "verdict": {
+      "verdict": "LIKELY_XYZW_PERMUTED_shift_-1",
+      "confidence": "high",
+      "reason": "shift_-1 cyclic shift of pass_car's WXYZ ref is the closest layout-blind match (5.5\u00b0). slot-pattern=max@3, min@5. Conclusion: dataset was permuted at write time."
+    }
+  },
+  {
+    "task": "Flexiv_breakfast_5_spoon_0429",
+    "episode_path": "/mnt/data/data/ymm/dataset/Flexiv/release/Flexiv_breakfast_5_spoon_0429/Flexiv\u51c6\u5907\u65e9\u9910-\u9910\u5177\u7cbe\u7ec6\u63d0\u53d6/worldcode_Flexiv-B_2026-04-24-18-54-36_0",
+    "h5_root_attrs": {},
+    "pose_path": "action/left_eef/feedback/pose",
+    "arm_token": "left",
+    "pose_value_shape": [
+      1162,
+      7
+    ],
+    "pose_value_dtype": "[('value', '<f4', (7,)), ('timestamp', '<f8')]",
+    "pose_group_attrs": {},
+    "pose_dataset_attrs": {},
+    "stats": {
+      "n_frames_total": 200,
+      "n_frames_scanned": 200,
+      "first_xyz": [
+        0.04390835762023926,
+        0.923345148563385,
+        -0.23030051589012146
+      ],
+      "first_quat4": [
+        0.8537998199462891,
+        -0.4367220401763916,
+        0.06322285532951355,
+        -0.2762293219566345
+      ],
+      "quat_norm_mean": 0.9999999989901943,
+      "quat_norm_std": 1.5754992098042266e-08,
+      "quat_norm_min": 0.9999999688149708,
+      "quat_norm_max": 1.00000003260305,
+      "median_abs_delta_q_per_step": 0.0006303563714027405,
+      "median_abs_delta_xyz_per_step_mm": 0.3364682197570801,
+      "per_component": [
+        {
+          "slot": 0,
+          "min": 0.7904822826385498,
+          "max": 0.8537998199462891,
+          "mean": 0.8380453589558602,
+          "std": 0.016365544411625493,
+          "abs_mean": 0.8380453589558602
+        },
+        {
+          "slot": 1,
+          "min": -0.46804025769233704,
+          "max": -0.4365125298500061,
+          "mean": -0.4486908437311649,
+          "std": 0.008526477604914456,
+          "abs_mean": 0.4486908437311649
+        },
+        {
+          "slot": 2,
+          "min": -0.11848134547472,
+          "max": 0.07861144095659256,
+          "mean": 0.03832470681212726,
+          "std": 0.05361895663592529,
+          "abs_mean": 0.060994154968502697
+        },
+        {
+          "slot": 3,
+          "min": -0.37737372517585754,
+          "max": -0.2762293219566345,
+          "mean": -0.3013261161744595,
+          "std": 0.029576430629259794,
+          "abs_mean": 0.3013261161744595
+        }
+      ]
+    },
+    "slot_pattern": {
+      "slot_with_max_abs": 3,
+      "slot_with_min_abs": 5,
+      "max_abs_value": 0.8380453589558602,
+      "min_abs_value": 0.060994154968502697,
+      "pattern": "max@3, min@5"
+    },
+    "cross_check_vs_pass_car": {
+      "max_abs_diff": {
+        "direct": 1.2776200401763917,
+        "shift_-1": 0.04416695982360841,
+        "shift_+1": 0.7925408199462891
+      },
+      "layout_blind_angle_deg": {
+        "direct": 103.37078084103472,
+        "shift_-1": 6.674064829896174,
+        "shift_+1": 139.8349198149949
+      }
+    },
+    "verdict": {
+      "verdict": "LIKELY_XYZW_PERMUTED_shift_-1",
+      "confidence": "high",
+      "reason": "shift_-1 cyclic shift of pass_car's WXYZ ref is the closest layout-blind match (6.7\u00b0). slot-pattern=max@3, min@5. Conclusion: dataset was permuted at write time."
+    }
+  },
+  {
+    "task": "Flexiv_breakfast_full_0429",
+    "episode_path": "/mnt/data/data/ymm/dataset/Flexiv/release/Flexiv_breakfast_full_0429/Flexiv\u51c6\u5907\u65e9\u9910-\u5168\u6d41\u7a0b/worldcode_Flexiv-B_2026-04-25-10-29-30_0",
+    "h5_root_attrs": {},
+    "pose_path": "action/left_eef/feedback/pose",
+    "arm_token": "left",
+    "pose_value_shape": [
+      5764,
+      7
+    ],
+    "pose_value_dtype": "[('value', '<f4', (7,)), ('timestamp', '<f8')]",
+    "pose_group_attrs": {},
+    "pose_dataset_attrs": {},
+    "stats": {
+      "n_frames_total": 200,
+      "n_frames_scanned": 200,
+      "first_xyz": [
+        0.0550052635371685,
+        0.911910891532898,
+        -0.22464796900749207
+      ],
+      "first_quat4": [
+        0.8468798995018005,
+        -0.4493926465511322,
+        0.0678357481956482,
+        -0.27611401677131653
+      ],
+      "quat_norm_mean": 0.9999999990835653,
+      "quat_norm_std": 1.5917870651063192e-08,
+      "quat_norm_min": 0.999999965819366,
+      "quat_norm_max": 1.0000000343507602,
+      "median_abs_delta_q_per_step": 0.0003139972686767578,
+      "median_abs_delta_xyz_per_step_mm": 0.34159421920776367,
+      "per_component": [
+        {
+          "slot": 0,
+          "min": -0.6354203820228577,
+          "max": 0.8492980003356934,
+          "mean": 0.6087158915400505,
+          "std": 0.4930714803537122,
+          "abs_mean": 0.7775706496834754
+        },
+        {
+          "slot": 1,
+          "min": -0.6464442014694214,
+          "max": 0.6374139785766602,
+          "mean": -0.3420072741806507,
+          "std": 0.3976670452336222,
+          "abs_mean": 0.5176504053175449
+        },
+        {
+          "slot": 2,
+          "min": -0.48627591133117676,
+          "max": 0.49047577381134033,
+          "mean": 0.05046184759703465,
+          "std": 0.21948089760308306,
+          "abs_mean": 0.16141728863469326
+        },
+        {
+          "slot": 3,
+          "min": -0.2769842743873596,
+          "max": 0.14451420307159424,
+          "mean": -0.20095719549804925,
+          "std": 0.14189913833498022,
+          "abs_mean": 0.23932058338075876
+        }
+      ]
+    },
+    "slot_pattern": {
+      "slot_with_max_abs": 3,
+      "slot_with_min_abs": 5,
+      "max_abs_value": 0.7775706496834754,
+      "min_abs_value": 0.16141728863469326,
+      "pattern": "max@3, min@5"
+    },
+    "cross_check_vs_pass_car": {
+      "max_abs_diff": {
+        "direct": 1.2902906465511323,
+        "shift_-1": 0.03552401677131653,
+        "shift_+1": 0.7856208995018006
+      },
+      "layout_blind_angle_deg": {
+        "direct": 101.72550199260996,
+        "shift_-1": 5.535456354930237,
+        "shift_+1": 139.04719756972986
+      }
+    },
+    "verdict": {
+      "verdict": "LIKELY_XYZW_PERMUTED_shift_-1",
+      "confidence": "high",
+      "reason": "shift_-1 cyclic shift of pass_car's WXYZ ref is the closest layout-blind match (5.5\u00b0). slot-pattern=max@3, min@5. Conclusion: dataset was permuted at write time."
+    }
+  },
+  {
+    "task": "Flexiv_breakfast_full_0527",
+    "episode_path": "/mnt/data/data/ymm/dataset/Flexiv/release/Flexiv_breakfast_full_0527/Flexiv\u51c6\u5907\u65e9\u9910-\u5168\u6d41\u7a0b/worldcode_Flexiv-B_2026-05-21-10-14-54_0",
+    "h5_root_attrs": {},
+    "pose_path": "action/left_eef/feedback/pose",
+    "arm_token": "left",
+    "pose_value_shape": [
+      4117,
+      7
+    ],
+    "pose_value_dtype": "[('value', '<f4', (7,)), ('timestamp', '<f8')]",
+    "pose_group_attrs": {},
+    "pose_dataset_attrs": {},
+    "stats": {
+      "n_frames_total": 200,
+      "n_frames_scanned": 200,
+      "first_xyz": [
+        0.05499263480305672,
+        0.9119148254394531,
+        -0.22467269003391266
+      ],
+      "first_quat4": [
+        0.8468894958496094,
+        -0.44938337802886963,
+        0.06782986223697662,
+        -0.2761012315750122
+      ],
+      "quat_norm_mean": 0.9999999984219844,
+      "quat_norm_std": 1.58689455415912e-08,
+      "quat_norm_min": 0.9999999608859701,
+      "quat_norm_max": 1.0000000341978985,
+      "median_abs_delta_q_per_step": 0.0016932487487792969,
+      "median_abs_delta_xyz_per_step_mm": 1.2257099151611328,
+      "per_component": [
+        {
+          "slot": 0,
+          "min": -0.6659871935844421,
+          "max": 0.8468896150588989,
+          "mean": 0.4914193585515022,
+          "std": 0.5333836313265312,
+          "abs_mean": 0.7200747284293175
+        },
+        {
+          "slot": 1,
+          "min": -0.6715601086616516,
+          "max": 0.6723694801330566,
+          "mean": -0.3185772305727005,
+          "std": 0.4640845547092624,
+          "abs_mean": 0.5582019454240799
+        },
+        {
+          "slot": 2,
+          "min": -0.48827022314071655,
+          "max": 0.48867276310920715,
+          "mean": -0.10682642202242278,
+          "std": 0.3304430060396514,
+          "abs_mean": 0.2922601293970365
+        },
+        {
+          "slot": 3,
+          "min": -0.28121984004974365,
+          "max": 0.18332307040691376,
+          "mean": -0.11394752997905017,
+          "std": 0.1534746972230137,
+          "abs_mean": 0.1794728260114789
+        }
+      ]
+    },
+    "slot_pattern": {
+      "slot_with_max_abs": 3,
+      "slot_with_min_abs": 6,
+      "max_abs_value": 0.7200747284293175,
+      "min_abs_value": 0.1794728260114789,
+      "pattern": "max@3, min@6"
+    },
+    "cross_check_vs_pass_car": {
+      "max_abs_diff": {
+        "direct": 1.2902813780288698,
+        "shift_-1": 0.03551123157501221,
+        "shift_+1": 0.7856304958496094
+      },
+      "layout_blind_angle_deg": {
+        "direct": 101.7268492609087,
+        "shift_-1": 5.535116007858036,
+        "shift_+1": 139.04875729102
+      }
+    },
+    "verdict": {
+      "verdict": "LIKELY_XYZW_PERMUTED_shift_-1",
+      "confidence": "high",
+      "reason": "shift_-1 cyclic shift of pass_car's WXYZ ref is the closest layout-blind match (5.5\u00b0). slot-pattern=max@3, min@6. Conclusion: dataset was permuted at write time."
+    }
+  },
+  {
+    "task": "Flexiv_chemExp_1_place_tube_0413",
+    "episode_path": "/mnt/data/data/ymm/dataset/Flexiv/release/Flexiv_chemExp_1_place_tube_0413/Flexiv\u5316\u5b66\u5b9e\u9a8c-\u8bd5\u5242\u74f6\u5206\u7c7b\u63d2\u67b6/worldcode_Flexiv-A_2026-04-13-17-30-57_0",
+    "h5_root_attrs": {},
+    "pose_path": "action/left_eef/feedback/pose",
+    "arm_token": "left",
+    "pose_value_shape": [
+      810,
+      7
+    ],
+    "pose_value_dtype": "[('value', '<f4', (7,)), ('timestamp', '<f8')]",
+    "pose_group_attrs": {},
+    "pose_dataset_attrs": {},
+    "stats": {
+      "n_frames_total": 200,
+      "n_frames_scanned": 200,
+      "first_xyz": [
+        0.04787127301096916,
+        0.9183078408241272,
+        -0.22296454012393951
+      ],
+      "first_quat4": [
+        0.8500758409500122,
+        -0.4424060881137848,
+        0.06194659322500229,
+        -0.2789454162120819
+      ],
+      "quat_norm_mean": 1.0000000005607186,
+      "quat_norm_std": 1.6468055178870217e-08,
+      "quat_norm_min": 0.9999999694720602,
+      "quat_norm_max": 1.000000038386586,
+      "median_abs_delta_q_per_step": 0.0014563202857971191,
+      "median_abs_delta_xyz_per_step_mm": 2.0710229873657227,
+      "per_component": [
+        {
+          "slot": 0,
+          "min": 0.7417713403701782,
+          "max": 0.8500758409500122,
+          "mean": 0.8048639211058617,
+          "std": 0.043328494681195436,
+          "abs_mean": 0.8048639211058617
+        },
+        {
+          "slot": 1,
+          "min": -0.6008267402648926,
+          "max": -0.4424060881137848,
+          "mean": -0.5070060887932777,
+          "std": 0.06330695960800388,
+          "abs_mean": 0.5070060887932777
+        },
+        {
+          "slot": 2,
+          "min": -0.07946005463600159,
+          "max": 0.06317039579153061,
+          "mean": -0.016731113004498185,
+          "std": 0.04677216831874004,
+          "abs_mean": 0.04262980169150978
+        },
+        {
+          "slot": 3,
+          "min": -0.32814663648605347,
+          "max": -0.2694742679595947,
+          "mean": -0.2942319117486477,
+          "std": 0.014621292728756138,
+          "abs_mean": 0.2942319117486477
+        }
+      ]
+    },
+    "slot_pattern": {
+      "slot_with_max_abs": 3,
+      "slot_with_min_abs": 5,
+      "max_abs_value": 0.8048639211058617,
+      "min_abs_value": 0.04262980169150978,
+      "pattern": "max@3, min@5"
+    },
+    "cross_check_vs_pass_car": {
+      "max_abs_diff": {
+        "direct": 1.283304088113785,
+        "shift_-1": 0.03848291188621522,
+        "shift_+1": 0.7888168409500123
+      },
+      "layout_blind_angle_deg": {
+        "direct": 102.86802896617759,
+        "shift_-1": 6.315592927334577,
+        "shift_+1": 139.66743629921618
+      }
+    },
+    "verdict": {
+      "verdict": "LIKELY_XYZW_PERMUTED_shift_-1",
+      "confidence": "high",
+      "reason": "shift_-1 cyclic shift of pass_car's WXYZ ref is the closest layout-blind match (6.3\u00b0). slot-pattern=max@3, min@5. Conclusion: dataset was permuted at write time."
+    }
+  },
+  {
+    "task": "Flexiv_chemExp_1_place_tube_0417",
+    "episode_path": "/mnt/data/data/ymm/dataset/Flexiv/release/Flexiv_chemExp_1_place_tube_0417/Flexiv\u5316\u5b66\u5b9e\u9a8c-\u8bd5\u5242\u74f6\u5206\u7c7b\u63d2\u67b6/worldcode_Flexiv-A_2026-04-17-12-07-06_0",
+    "h5_root_attrs": {},
+    "pose_path": "action/left_eef/feedback/pose",
+    "arm_token": "left",
+    "pose_value_shape": [
+      986,
+      7
+    ],
+    "pose_value_dtype": "[('value', '<f4', (7,)), ('timestamp', '<f8')]",
+    "pose_group_attrs": {},
+    "pose_dataset_attrs": {},
+    "stats": {
+      "n_frames_total": 200,
+      "n_frames_scanned": 200,
+      "first_xyz": [
+        0.05083238705992699,
+        0.9162082672119141,
+        -0.2213088870048523
+      ],
+      "first_quat4": [
+        0.8482716083526611,
+        -0.44496428966522217,
+        0.06338111311197281,
+        -0.2800444960594177
+      ],
+      "quat_norm_mean": 0.999999998815552,
+      "quat_norm_std": 1.4488995087134976e-08,
+      "quat_norm_min": 0.9999999679987824,
+      "quat_norm_max": 1.0000000297219624,
+      "median_abs_delta_q_per_step": 0.0009740646928548813,
+      "median_abs_delta_xyz_per_step_mm": 1.4099180698394775,
+      "per_component": [
+        {
+          "slot": 0,
+          "min": 0.7905190587043762,
+          "max": 0.8743711709976196,
+          "mean": 0.8513557913899422,
+          "std": 0.019907971081205064,
+          "abs_mean": 0.8513557913899422
+        },
+        {
+          "slot": 1,
+          "min": -0.5577023029327393,
+          "max": -0.42002376914024353,
+          "mean": -0.4562352931499481,
+          "std": 0.034064584723173516,
+          "abs_mean": 0.4562352931499481
+        },
+        {
+          "slot": 2,
+          "min": -0.03263242170214653,
+          "max": 0.06339558213949203,
+          "mean": 0.024121311254930333,
+          "std": 0.035318472409966335,
+          "abs_mean": 0.03640717462832981
+        },
+        {
+          "slot": 3,
+          "min": -0.2822595238685608,
+          "max": -0.20946776866912842,
+          "mean": -0.2511549261212349,
+          "std": 0.02403994742848124,
+          "abs_mean": 0.2511549261212349
+        }
+      ]
+    },
+    "slot_pattern": {
+      "slot_with_max_abs": 3,
+      "slot_with_min_abs": 5,
+      "max_abs_value": 0.8513557913899422,
+      "min_abs_value": 0.03640717462832981,
+      "pattern": "max@3, min@5"
+    },
+    "cross_check_vs_pass_car": {
+      "max_abs_diff": {
+        "direct": 1.2858622896652223,
+        "shift_-1": 0.039454496059417726,
+        "shift_+1": 0.7870126083526612
+      },
+      "layout_blind_angle_deg": {
+        "direct": 102.50494754111695,
+        "shift_-1": 6.178195933192453,
+        "shift_+1": 139.3938957063599
+      }
+    },
+    "verdict": {
+      "verdict": "LIKELY_XYZW_PERMUTED_shift_-1",
+      "confidence": "high",
+      "reason": "shift_-1 cyclic shift of pass_car's WXYZ ref is the closest layout-blind match (6.2\u00b0). slot-pattern=max@3, min@5. Conclusion: dataset was permuted at write time."
+    }
+  },
+  {
+    "task": "Flexiv_chemExp_2_drawer_storage_0425",
+    "episode_path": "/mnt/data/data/ymm/dataset/Flexiv/release/Flexiv_chemExp_2_drawer_storage_0425/Flexiv\u5316\u5b66\u5b9e\u9a8c-\u62bd\u5c49\u6536\u7eb3\u4ea4\u4e92/worldcode_Flexiv-A_2026-04-23-11-00-45_0",
+    "h5_root_attrs": {},
+    "pose_path": "action/left_eef/feedback/pose",
+    "arm_token": "left",
+    "pose_value_shape": [
+      1225,
+      7
+    ],
+    "pose_value_dtype": "[('value', '<f4', (7,)), ('timestamp', '<f8')]",
+    "pose_group_attrs": {},
+    "pose_dataset_attrs": {},
+    "stats": {
+      "n_frames_total": 200,
+      "n_frames_scanned": 200,
+      "first_xyz": [
+        0.050478044897317886,
+        0.9164546132087708,
+        -0.22159098088741302
+      ],
+      "first_quat4": [
+        0.8485069870948792,
+        -0.4446747303009033,
+        0.06320375204086304,
+        -0.2798312306404114
+      ],
+      "quat_norm_mean": 1.000000000731929,
+      "quat_norm_std": 1.563087680807006e-08,
+      "quat_norm_min": 0.9999999671697998,
+      "quat_norm_max": 1.000000032605966,
+      "median_abs_delta_q_per_step": 8.246302604675293e-05,
+      "median_abs_delta_xyz_per_step_mm": 0.09085237979888916,
+      "per_component": [
+        {
+          "slot": 0,
+          "min": 0.8458266258239746,
+          "max": 0.8488311171531677,
+          "mean": 0.8476823765039444,
+          "std": 0.00080408629623174,
+          "abs_mean": 0.8476823765039444
+        },
+        {
+          "slot": 1,
+          "min": -0.4449160099029541,
+          "max": -0.43795132637023926,
+          "mean": -0.4425975292921066,
+          "std": 0.002058219365136335,
+          "abs_mean": 0.4425975292921066
+        },
+        {
+          "slot": 2,
+          "min": 0.06315718591213226,
+          "max": 0.06622116267681122,
+          "mean": 0.06470227517187595,
+          "std": 0.0009717533083189222,
+          "abs_mean": 0.06470227517187595
+        },
+        {
+          "slot": 3,
+          "min": -0.2972942590713501,
+          "max": -0.2798312306404114,
+          "mean": -0.2851699535548687,
+          "std": 0.005282342651102121,
+          "abs_mean": 0.2851699535548687
+        }
+      ]
+    },
+    "slot_pattern": {
+      "slot_with_max_abs": 3,
+      "slot_with_min_abs": 5,
+      "max_abs_value": 0.8476823765039444,
+      "min_abs_value": 0.06470227517187595,
+      "pattern": "max@3, min@5"
+    },
+    "cross_check_vs_pass_car": {
+      "max_abs_diff": {
+        "direct": 1.2855727303009035,
+        "shift_-1": 0.03924123064041138,
+        "shift_+1": 0.7872479870948792
+      },
+      "layout_blind_angle_deg": {
+        "direct": 102.54684454306266,
+        "shift_-1": 6.185539315083111,
+        "shift_+1": 139.43139537886398
+      }
+    },
+    "verdict": {
+      "verdict": "LIKELY_XYZW_PERMUTED_shift_-1",
+      "confidence": "high",
+      "reason": "shift_-1 cyclic shift of pass_car's WXYZ ref is the closest layout-blind match (6.2\u00b0). slot-pattern=max@3, min@5. Conclusion: dataset was permuted at write time."
+    }
+  },
+  {
+    "task": "Flexiv_chemExp_3_flask_transfer_0425",
+    "episode_path": "/mnt/data/data/ymm/dataset/Flexiv/release/Flexiv_chemExp_3_flask_transfer_0425/Flexiv\u5316\u5b66\u5b9e\u9a8c-\u5bb9\u91cf\u74f6\u8f6c\u79fb\u4e0e\u521d\u6b21\u5f00\u76d6/worldcode_Flexiv-A_2026-04-16-14-23-05_0",
+    "h5_root_attrs": {},
+    "pose_path": "action/left_eef/feedback/pose",
+    "arm_token": "left",
+    "pose_value_shape": [
+      1434,
+      7
+    ],
+    "pose_value_dtype": "[('value', '<f4', (7,)), ('timestamp', '<f8')]",
+    "pose_group_attrs": {},
+    "pose_dataset_attrs": {},
+    "stats": {
+      "n_frames_total": 200,
+      "n_frames_scanned": 200,
+      "first_xyz": [
+        0.05044587701559067,
+        0.9167346954345703,
+        -0.22088339924812317
+      ],
+      "first_quat4": [
+        0.84837406873703,
+        -0.44454044103622437,
+        0.06310200691223145,
+        -0.2804698050022125
+      ],
+      "quat_norm_mean": 1.0000000011479115,
+      "quat_norm_std": 1.5548653912342653e-08,
+      "quat_norm_min": 0.9999999668303278,
+      "quat_norm_max": 1.0000000300569574,
+      "median_abs_delta_q_per_step": 0.0002197660505771637,
+      "median_abs_delta_xyz_per_step_mm": 0.19032834097743034,
+      "per_component": [
+        {
+          "slot": 0,
+          "min": 0.840957522392273,
+          "max": 0.8552369475364685,
+          "mean": 0.846490678191185,
+          "std": 0.003672414827061441,
+          "abs_mean": 0.846490678191185
+        },
+        {
+          "slot": 1,
+          "min": -0.45896387100219727,
+          "max": -0.44065043330192566,
+          "mean": -0.44964285105466845,
+          "std": 0.004731994847072303,
+          "abs_mean": 0.44964285105466845
+        },
+        {
+          "slot": 2,
+          "min": 0.026586569845676422,
+          "max": 0.06324660778045654,
+          "mean": 0.04697327893227339,
+          "std": 0.01186690151329062,
+          "abs_mean": 0.04697327893227339
+        },
+        {
+          "slot": 3,
+          "min": -0.2874675393104553,
+          "max": -0.2714485228061676,
+          "mean": -0.2808417357504368,
+          "std": 0.004423719734792417,
+          "abs_mean": 0.2808417357504368
+        }
+      ]
+    },
+    "slot_pattern": {
+      "slot_with_max_abs": 3,
+      "slot_with_min_abs": 5,
+      "max_abs_value": 0.846490678191185,
+      "min_abs_value": 0.04697327893227339,
+      "pattern": "max@3, min@5"
+    },
+    "cross_check_vs_pass_car": {
+      "max_abs_diff": {
+        "direct": 1.2854384410362245,
+        "shift_-1": 0.039879805002212526,
+        "shift_+1": 0.7871150687370301
+      },
+      "layout_blind_angle_deg": {
+        "direct": 102.56956702636039,
+        "shift_-1": 6.246702081543683,
+        "shift_+1": 139.40927269312843
+      }
+    },
+    "verdict": {
+      "verdict": "LIKELY_XYZW_PERMUTED_shift_-1",
+      "confidence": "high",
+      "reason": "shift_-1 cyclic shift of pass_car's WXYZ ref is the closest layout-blind match (6.2\u00b0). slot-pattern=max@3, min@5. Conclusion: dataset was permuted at write time."
+    }
+  },
+  {
+    "task": "Flexiv_chemExp_4_cap_exchange_0425",
+    "episode_path": "/mnt/data/data/ymm/dataset/Flexiv/release/Flexiv_chemExp_4_cap_exchange_0425/Flexiv\u5316\u5b66\u5b9e\u9a8c-\u74f6\u76d6\u4ea4\u6362\u4e0e\u7ba1\u8def\u8fde\u63a5/worldcode_Flexiv-A_2026-04-20-12-10-02_0",
+    "h5_root_attrs": {},
+    "pose_path": "action/left_eef/feedback/pose",
+    "arm_token": "left",
+    "pose_value_shape": [
+      2121,
+      7
+    ],
+    "pose_value_dtype": "[('value', '<f4', (7,)), ('timestamp', '<f8')]",
+    "pose_group_attrs": {},
+    "pose_dataset_attrs": {},
+    "stats": {
+      "n_frames_total": 200,
+      "n_frames_scanned": 200,
+      "first_xyz": [
+        0.049929529428482056,
+        0.917127251625061,
+        -0.22191877663135529
+      ],
+      "first_quat4": [
+        0.848859429359436,
+        -0.44415655732154846,
+        0.06281263381242752,
+        -0.27967339754104614
+      ],
+      "quat_norm_mean": 1.0000000014444645,
+      "quat_norm_std": 1.5436397631984018e-08,
+      "quat_norm_min": 0.9999999672453493,
+      "quat_norm_max": 1.0000000335944335,
+      "median_abs_delta_q_per_step": 0.0008324086666107178,
+      "median_abs_delta_xyz_per_step_mm": 0.3668665885925293,
+      "per_component": [
+        {
+          "slot": 0,
+          "min": 0.6766752600669861,
+          "max": 0.855455756187439,
+          "mean": 0.8138029783964157,
+          "std": 0.06353618701927298,
+          "abs_mean": 0.8138029783964157
+        },
+        {
+          "slot": 1,
+          "min": -0.6151703596115112,
+          "max": -0.4197787642478943,
+          "mean": -0.4782550902664661,
+          "std": 0.07032396651675706,
+          "abs_mean": 0.4782550902664661
+        },
+        {
+          "slot": 2,
+          "min": 0.0056339167058467865,
+          "max": 0.06281372904777527,
+          "mean": 0.04877331903437152,
+          "std": 0.01668294729527093,
+          "abs_mean": 0.04877331903437152
+        },
+        {
+          "slot": 3,
+          "min": -0.4026176333427429,
+          "max": -0.2795918881893158,
+          "mean": -0.3092531596124172,
+          "std": 0.04147050082070372,
+          "abs_mean": 0.3092531596124172
+        }
+      ]
+    },
+    "slot_pattern": {
+      "slot_with_max_abs": 3,
+      "slot_with_min_abs": 5,
+      "max_abs_value": 0.8138029783964157,
+      "min_abs_value": 0.04877331903437152,
+      "pattern": "max@3, min@5"
+    },
+    "cross_check_vs_pass_car": {
+      "max_abs_diff": {
+        "direct": 1.2850545573215486,
+        "shift_-1": 0.039083397541046144,
+        "shift_+1": 0.7876004293594361
+      },
+      "layout_blind_angle_deg": {
+        "direct": 102.62741932140726,
+        "shift_-1": 6.21684758878115,
+        "shift_+1": 139.4934355888892
+      }
+    },
+    "verdict": {
+      "verdict": "LIKELY_XYZW_PERMUTED_shift_-1",
+      "confidence": "high",
+      "reason": "shift_-1 cyclic shift of pass_car's WXYZ ref is the closest layout-blind match (6.2\u00b0). slot-pattern=max@3, min@5. Conclusion: dataset was permuted at write time."
+    }
+  },
+  {
+    "task": "Flexiv_chemExp_5_Sealing_0425",
+    "episode_path": "/mnt/data/data/ymm/dataset/Flexiv/release/Flexiv_chemExp_5_Sealing_0425/Flexiv\u5316\u5b66\u5b9e\u9a8c-\u7cfb\u7edf\u5c01\u95ed\u590d\u4f4d/worldcode_Flexiv-A_2026-04-22-14-50-48_0",
+    "h5_root_attrs": {},
+    "pose_path": "action/left_eef/feedback/pose",
+    "arm_token": "left",
+    "pose_value_shape": [
+      1659,
+      7
+    ],
+    "pose_value_dtype": "[('value', '<f4', (7,)), ('timestamp', '<f8')]",
+    "pose_group_attrs": {},
+    "pose_dataset_attrs": {},
+    "stats": {
+      "n_frames_total": 200,
+      "n_frames_scanned": 200,
+      "first_xyz": [
+        0.05062934011220932,
+        0.9162501096725464,
+        -0.22171439230442047
+      ],
+      "first_quat4": [
+        0.8484504818916321,
+        -0.4448501467704773,
+        0.06329277902841568,
+        -0.2797037363052368
+      ],
+      "quat_norm_mean": 1.0000000011712442,
+      "quat_norm_std": 1.626192224910856e-08,
+      "quat_norm_min": 0.9999999676864089,
+      "quat_norm_max": 1.0000000322549487,
+      "median_abs_delta_q_per_step": 0.0004291832447052002,
+      "median_abs_delta_xyz_per_step_mm": 0.49763917922973633,
+      "per_component": [
+        {
+          "slot": 0,
+          "min": 0.8391107320785522,
+          "max": 0.8781862258911133,
+          "mean": 0.8616860410571099,
+          "std": 0.01209630758544838,
+          "abs_mean": 0.8616860410571099
+        },
+        {
+          "slot": 1,
+          "min": -0.4451883137226105,
+          "max": -0.38805556297302246,
+          "mean": -0.41607411980628967,
+          "std": 0.019864726069498326,
+          "abs_mean": 0.41607411980628967
+        },
+        {
+          "slot": 2,
+          "min": -0.04048004373908043,
+          "max": 0.06355060636997223,
+          "mean": 0.03749909699778073,
+          "std": 0.026576312683935118,
+          "abs_mean": 0.043655095578869804
+        },
+        {
+          "slot": 3,
+          "min": -0.33119747042655945,
+          "max": -0.2748861014842987,
+          "mean": -0.28552989795804024,
+          "std": 0.014098316167713846,
+          "abs_mean": 0.28552989795804024
+        }
+      ]
+    },
+    "slot_pattern": {
+      "slot_with_max_abs": 3,
+      "slot_with_min_abs": 5,
+      "max_abs_value": 0.8616860410571099,
+      "min_abs_value": 0.043655095578869804,
+      "pattern": "max@3, min@5"
+    },
+    "cross_check_vs_pass_car": {
+      "max_abs_diff": {
+        "direct": 1.2857481467704774,
+        "shift_-1": 0.03911373630523682,
+        "shift_+1": 0.7871914818916321
+      },
+      "layout_blind_angle_deg": {
+        "direct": 102.52203463277823,
+        "shift_-1": 6.1608879824723735,
+        "shift_+1": 139.42500824106318
+      }
+    },
+    "verdict": {
+      "verdict": "LIKELY_XYZW_PERMUTED_shift_-1",
+      "confidence": "high",
+      "reason": "shift_-1 cyclic shift of pass_car's WXYZ ref is the closest layout-blind match (6.2\u00b0). slot-pattern=max@3, min@5. Conclusion: dataset was permuted at write time."
+    }
+  },
+  {
+    "task": "Flexiv_chemExp_full_0429",
+    "episode_path": "/mnt/data/data/ymm/dataset/Flexiv/release/Flexiv_chemExp_full_0429/Flexiv\u5316\u5b66\u5b9e\u9a8c-\u5168\u6d41\u7a0b/worldcode_Flexiv-A_2026-04-24-14-38-40_0",
+    "h5_root_attrs": {},
+    "pose_path": "action/left_eef/feedback/pose",
+    "arm_token": "left",
+    "pose_value_shape": [
+      8438,
+      7
+    ],
+    "pose_value_dtype": "[('value', '<f4', (7,)), ('timestamp', '<f8')]",
+    "pose_group_attrs": {},
+    "pose_dataset_attrs": {},
+    "stats": {
+      "n_frames_total": 200,
+      "n_frames_scanned": 200,
+      "first_xyz": [
+        0.050731491297483444,
+        0.9161780476570129,
+        -0.22159703075885773
+      ],
+      "first_quat4": [
+        0.8483752608299255,
+        -0.44492819905281067,
+        0.06335046887397766,
+        -0.2797946631908417
+      ],
+      "quat_norm_mean": 1.000000000828355,
+      "quat_norm_std": 1.655325026924594e-08,
+      "quat_norm_min": 0.999999966972932,
+      "quat_norm_max": 1.0000000329959788,
+      "median_abs_delta_q_per_step": 0.0016423463821411133,
+      "median_abs_delta_xyz_per_step_mm": 1.2505054473876953,
+      "per_component": [
+        {
+          "slot": 0,
+          "min": 0.78623366355896,
+          "max": 0.8870190382003784,
+          "mean": 0.8484086775779724,
+          "std": 0.03284567654768253,
+          "abs_mean": 0.8484086775779724
+        },
+        {
+          "slot": 1,
+          "min": -0.5818425416946411,
+          "max": -0.43155691027641296,
+          "mean": -0.4764492483437061,
+          "std": 0.05279116033670113,
+          "abs_mean": 0.4764492483437061
+        },
+        {
+          "slot": 2,
+          "min": -0.008257908746600151,
+          "max": 0.06335073709487915,
+          "mean": 0.02736062501819106,
+          "std": 0.021907261600412006,
+          "abs_mean": 0.02811993506300496
+        },
+        {
+          "slot": 3,
+          "min": -0.28251028060913086,
+          "max": -0.15714403986930847,
+          "mean": -0.214747559055686,
+          "std": 0.044587443408018755,
+          "abs_mean": 0.214747559055686
+        }
+      ]
+    },
+    "slot_pattern": {
+      "slot_with_max_abs": 3,
+      "slot_with_min_abs": 5,
+      "max_abs_value": 0.8484086775779724,
+      "min_abs_value": 0.02811993506300496,
+      "pattern": "max@3, min@5"
+    },
+    "cross_check_vs_pass_car": {
+      "max_abs_diff": {
+        "direct": 1.2858261990528108,
+        "shift_-1": 0.039204663190841677,
+        "shift_+1": 0.7871162608299256
+      },
+      "layout_blind_angle_deg": {
+        "direct": 102.51015610909012,
+        "shift_-1": 6.161537219435879,
+        "shift_+1": 139.41200792161263
+      }
+    },
+    "verdict": {
+      "verdict": "LIKELY_XYZW_PERMUTED_shift_-1",
+      "confidence": "high",
+      "reason": "shift_-1 cyclic shift of pass_car's WXYZ ref is the closest layout-blind match (6.2\u00b0). slot-pattern=max@3, min@5. Conclusion: dataset was permuted at write time."
+    }
+  },
+  {
+    "task": "Flexiv_clothing_1_clothing_0425",
+    "episode_path": "/mnt/data/data/ymm/dataset/Flexiv/release/Flexiv_clothing_1_clothing_0425/Flexiv\u6253\u5305\u8863\u670d-\u6298\u53e0\u8863\u670d/worldcode_Flexiv-B_2026-04-16-16-14-51_0",
+    "h5_root_attrs": {},
+    "pose_path": "action/left_eef/feedback/pose",
+    "arm_token": "left",
+    "pose_value_shape": [
+      1706,
+      7
+    ],
+    "pose_value_dtype": "[('value', '<f4', (7,)), ('timestamp', '<f8')]",
+    "pose_group_attrs": {},
+    "pose_dataset_attrs": {},
+    "stats": {
+      "n_frames_total": 200,
+      "n_frames_scanned": 200,
+      "first_xyz": [
+        0.05523101985454559,
+        0.9118193984031677,
+        -0.22428907454013824
+      ],
+      "first_quat4": [
+        0.8467183709144592,
+        -0.4495027959346771,
+        0.06803140789270401,
+        -0.2763819694519043
+      ],
+      "quat_norm_mean": 1.0000000002712481,
+      "quat_norm_std": 1.4802198385666632e-08,
+      "quat_norm_min": 0.9999999660074446,
+      "quat_norm_max": 1.0000000398271096,
+      "median_abs_delta_q_per_step": 0.002270042896270752,
+      "median_abs_delta_xyz_per_step_mm": 3.177136182785034,
+      "per_component": [
+        {
+          "slot": 0,
+          "min": 0.7255649566650391,
+          "max": 0.8502650856971741,
+          "mean": 0.8080611738562584,
+          "std": 0.03925700697901963,
+          "abs_mean": 0.8080611738562584
+        },
+        {
+          "slot": 1,
+          "min": -0.5848917365074158,
+          "max": -0.4382174611091614,
+          "mean": -0.4984339039027691,
+          "std": 0.045560767773262394,
+          "abs_mean": 0.4984339039027691
+        },
+        {
+          "slot": 2,
+          "min": 0.019417420029640198,
+          "max": 0.18389154970645905,
+          "mean": 0.10468493423424662,
+          "std": 0.05532639002974989,
+          "abs_mean": 0.10468493423424662
+        },
+        {
+          "slot": 3,
+          "min": -0.38540711998939514,
+          "max": -0.20737726986408234,
+          "mean": -0.2812326043844223,
+          "std": 0.0432685159619546,
+          "abs_mean": 0.2812326043844223
+        }
+      ]
+    },
+    "slot_pattern": {
+      "slot_with_max_abs": 3,
+      "slot_with_min_abs": 5,
+      "max_abs_value": 0.8080611738562584,
+      "min_abs_value": 0.10468493423424662,
+      "pattern": "max@3, min@5"
+    },
+    "cross_check_vs_pass_car": {
+      "max_abs_diff": {
+        "direct": 1.2904007959346773,
+        "shift_-1": 0.0357919694519043,
+        "shift_+1": 0.7854593709144593
+      },
+      "layout_blind_angle_deg": {
+        "direct": 101.70123472696935,
+        "shift_-1": 5.550728006800691,
+        "shift_+1": 139.00927865158167
+      }
+    },
+    "verdict": {
+      "verdict": "LIKELY_XYZW_PERMUTED_shift_-1",
+      "confidence": "high",
+      "reason": "shift_-1 cyclic shift of pass_car's WXYZ ref is the closest layout-blind match (5.6\u00b0). slot-pattern=max@3, min@5. Conclusion: dataset was permuted at write time."
+    }
+  },
+  {
+    "task": "Flexiv_clothing_1_clothing_0429",
+    "episode_path": "/mnt/data/data/ymm/dataset/Flexiv/release/Flexiv_clothing_1_clothing_0429/Flexiv\u6253\u5305\u8863\u670d-\u6298\u53e0\u8863\u670d/worldcode_Flexiv-B_2026-04-17-10-19-51_0",
+    "h5_root_attrs": {},
+    "pose_path": "action/left_eef/feedback/pose",
+    "arm_token": "left",
+    "pose_value_shape": [
+      1831,
+      7
+    ],
+    "pose_value_dtype": "[('value', '<f4', (7,)), ('timestamp', '<f8')]",
+    "pose_group_attrs": {},
+    "pose_dataset_attrs": {},
+    "stats": {
+      "n_frames_total": 200,
+      "n_frames_scanned": 200,
+      "first_xyz": [
+        0.05499669536948204,
+        0.9119216203689575,
+        -0.22465483844280243
+      ],
+      "first_quat4": [
+        0.8468859791755676,
+        -0.4493858218193054,
+        0.06782718002796173,
+        -0.27610868215560913
+      ],
+      "quat_norm_mean": 0.999999998235986,
+      "quat_norm_std": 1.6057747125787138e-08,
+      "quat_norm_min": 0.9999999664786866,
+      "quat_norm_max": 1.0000000346154831,
+      "median_abs_delta_q_per_step": 0.002142190933227539,
+      "median_abs_delta_xyz_per_step_mm": 1.8630102276802063,
+      "per_component": [
+        {
+          "slot": 0,
+          "min": 0.7227931618690491,
+          "max": 0.8478012084960938,
+          "mean": 0.8113463279604912,
+          "std": 0.03565238979192621,
+          "abs_mean": 0.8113463279604912
+        },
+        {
+          "slot": 1,
+          "min": -0.5656153559684753,
+          "max": -0.44254055619239807,
+          "mean": -0.4979375463724136,
+          "std": 0.04755468859401989,
+          "abs_mean": 0.4979375463724136
+        },
+        {
+          "slot": 2,
+          "min": 0.011925436556339264,
+          "max": 0.17480994760990143,
+          "mean": 0.10154870572499931,
+          "std": 0.04123421447675615,
+          "abs_mean": 0.10154870572499931
+        },
+        {
+          "slot": 3,
+          "min": -0.3968716263771057,
+          "max": -0.20146551728248596,
+          "mean": -0.2775707822293043,
+          "std": 0.034421678621833894,
+          "abs_mean": 0.2775707822293043
+        }
+      ]
+    },
+    "slot_pattern": {
+      "slot_with_max_abs": 3,
+      "slot_with_min_abs": 5,
+      "max_abs_value": 0.8113463279604912,
+      "min_abs_value": 0.10154870572499931,
+      "pattern": "max@3, min@5"
+    },
+    "cross_check_vs_pass_car": {
+      "max_abs_diff": {
+        "direct": 1.2902838218193056,
+        "shift_-1": 0.03551868215560913,
+        "shift_+1": 0.7856269791755677
+      },
+      "layout_blind_angle_deg": {
+        "direct": 101.72679334068985,
+        "shift_-1": 5.5354694662660835,
+        "shift_+1": 139.04854914635385
+      }
+    },
+    "verdict": {
+      "verdict": "LIKELY_XYZW_PERMUTED_shift_-1",
+      "confidence": "high",
+      "reason": "shift_-1 cyclic shift of pass_car's WXYZ ref is the closest layout-blind match (5.5\u00b0). slot-pattern=max@3, min@5. Conclusion: dataset was permuted at write time."
+    }
+  },
+  {
+    "task": "Flexiv_clothing_2_box_assembly_0513",
+    "episode_path": "/mnt/data/data/ymm/dataset/Flexiv/release/Flexiv_clothing_2_box_assembly_0513/Flexiv\u6253\u5305\u8863\u670d-\u793c\u76d2\u63d0\u53d6\u4e0e\u4e09\u7ef4\u7ec4\u88c5/worldcode_Flexiv-A_2026-05-05-14-04-03_0",
+    "h5_root_attrs": {},
+    "pose_path": "action/left_eef/feedback/pose",
+    "arm_token": "left",
+    "pose_value_shape": [
+      2373,
+      7
+    ],
+    "pose_value_dtype": "[('value', '<f4', (7,)), ('timestamp', '<f8')]",
+    "pose_group_attrs": {},
+    "pose_dataset_attrs": {},
+    "stats": {
+      "n_frames_total": 200,
+      "n_frames_scanned": 200,
+      "first_xyz": [
+        0.050773512572050095,
+        0.916508674621582,
+        -0.220794215798378
+      ],
+      "first_quat4": [
+        0.8481826782226562,
+        -0.4446755051612854,
+        0.0634838193655014,
+        -0.2807483375072479
+      ],
+      "quat_norm_mean": 1.0000000000589324,
+      "quat_norm_std": 1.460336250467326e-08,
+      "quat_norm_min": 0.9999999703462568,
+      "quat_norm_max": 1.0000000300948053,
+      "median_abs_delta_q_per_step": 0.0017375946044921875,
+      "median_abs_delta_xyz_per_step_mm": 2.423524856567383,
+      "per_component": [
+        {
+          "slot": 0,
+          "min": 0.8279805779457092,
+          "max": 0.8973971009254456,
+          "mean": 0.855346537232399,
+          "std": 0.021663281983937868,
+          "abs_mean": 0.855346537232399
+        },
+        {
+          "slot": 1,
+          "min": -0.46603110432624817,
+          "max": -0.36011821031570435,
+          "mean": -0.4255430807173252,
+          "std": 0.030117420122673436,
+          "abs_mean": 0.4255430807173252
+        },
+        {
+          "slot": 2,
+          "min": 0.05027954652905464,
+          "max": 0.21468773484230042,
+          "mean": 0.11603216379880905,
+          "std": 0.05313106005761096,
+          "abs_mean": 0.11603216379880905
+        },
+        {
+          "slot": 3,
+          "min": -0.29134565591812134,
+          "max": -0.2155567705631256,
+          "mean": -0.2630861337482929,
+          "std": 0.02045347612393898,
+          "abs_mean": 0.2630861337482929
+        }
+      ]
+    },
+    "slot_pattern": {
+      "slot_with_max_abs": 3,
+      "slot_with_min_abs": 5,
+      "max_abs_value": 0.855346537232399,
+      "min_abs_value": 0.11603216379880905,
+      "pattern": "max@3, min@5"
+    },
+    "cross_check_vs_pass_car": {
+      "max_abs_diff": {
+        "direct": 1.2855735051612855,
+        "shift_-1": 0.040158337507247927,
+        "shift_+1": 0.7869236782226563
+      },
+      "layout_blind_angle_deg": {
+        "direct": 102.53017510333073,
+        "shift_-1": 6.258490365741753,
+        "shift_+1": 139.3511390916536
+      }
+    },
+    "verdict": {
+      "verdict": "LIKELY_XYZW_PERMUTED_shift_-1",
+      "confidence": "high",
+      "reason": "shift_-1 cyclic shift of pass_car's WXYZ ref is the closest layout-blind match (6.3\u00b0). slot-pattern=max@3, min@5. Conclusion: dataset was permuted at write time."
+    }
+  },
+  {
+    "task": "Flexiv_clothing_3_packing_0429",
+    "episode_path": "/mnt/data/data/ymm/dataset/Flexiv/release/Flexiv_clothing_3_packing_0429/Flexiv\u6253\u5305\u8863\u670d-\u8863\u7269\u5e73\u7a33\u88c5\u7bb1/worldcode_Flexiv-A_2026-04-27-14-59-11_0",
+    "h5_root_attrs": {},
+    "pose_path": "action/left_eef/feedback/pose",
+    "arm_token": "left",
+    "pose_value_shape": [
+      1088,
+      7
+    ],
+    "pose_value_dtype": "[('value', '<f4', (7,)), ('timestamp', '<f8')]",
+    "pose_group_attrs": {},
+    "pose_dataset_attrs": {},
+    "stats": {
+      "n_frames_total": 200,
+      "n_frames_scanned": 200,
+      "first_xyz": [
+        0.05060627683997154,
+        0.9160776734352112,
+        -0.22200198471546173
+      ],
+      "first_quat4": [
+        0.8485251069068909,
+        -0.44489142298698425,
+        0.06336561590433121,
+        -0.2793949246406555
+      ],
+      "quat_norm_mean": 0.999999998015165,
+      "quat_norm_std": 1.4801992917048969e-08,
+      "quat_norm_min": 0.9999999641644641,
+      "quat_norm_max": 1.0000000308729875,
+      "median_abs_delta_q_per_step": 0.0020828843116760254,
+      "median_abs_delta_xyz_per_step_mm": 1.765429973602295,
+      "per_component": [
+        {
+          "slot": 0,
+          "min": 0.7485806941986084,
+          "max": 0.8767330646514893,
+          "mean": 0.8186550736427307,
+          "std": 0.03422272146051735,
+          "abs_mean": 0.8186550736427307
+        },
+        {
+          "slot": 1,
+          "min": -0.6260836124420166,
+          "max": -0.4107491075992584,
+          "mean": -0.49983712315559387,
+          "std": 0.05429883452667824,
+          "abs_mean": 0.49983712315559387
+        },
+        {
+          "slot": 2,
+          "min": 0.05906513333320618,
+          "max": 0.22761382162570953,
+          "mean": 0.14722748709842562,
+          "std": 0.05995007569284034,
+          "abs_mean": 0.14722748709842562
+        },
+        {
+          "slot": 3,
+          "min": -0.2794020175933838,
+          "max": -0.15900321304798126,
+          "mean": -0.22144764073193074,
+          "std": 0.039219338739105304,
+          "abs_mean": 0.22144764073193074
+        }
+      ]
+    },
+    "slot_pattern": {
+      "slot_with_max_abs": 3,
+      "slot_with_min_abs": 5,
+      "max_abs_value": 0.8186550736427307,
+      "min_abs_value": 0.14722748709842562,
+      "pattern": "max@3, min@5"
+    },
+    "cross_check_vs_pass_car": {
+      "max_abs_diff": {
+        "direct": 1.2857894229869844,
+        "shift_-1": 0.03880492464065552,
+        "shift_+1": 0.7872661069068909
+      },
+      "layout_blind_angle_deg": {
+        "direct": 102.51192771361822,
+        "shift_-1": 6.133531215412674,
+        "shift_+1": 139.43389500344955
+      }
+    },
+    "verdict": {
+      "verdict": "LIKELY_XYZW_PERMUTED_shift_-1",
+      "confidence": "high",
+      "reason": "shift_-1 cyclic shift of pass_car's WXYZ ref is the closest layout-blind match (6.1\u00b0). slot-pattern=max@3, min@5. Conclusion: dataset was permuted at write time."
+    }
+  },
+  {
+    "task": "Flexiv_clothing_4_box_closing_0513",
+    "episode_path": "/mnt/data/data/ymm/dataset/Flexiv/release/Flexiv_clothing_4_box_closing_0513/Flexiv\u6253\u5305\u8863\u670d-\u793c\u76d2\u5c01\u95ed\u6210\u578b/worldcode_Flexiv-A_2026-04-29-14-11-54_0",
+    "h5_root_attrs": {},
+    "pose_path": "action/left_eef/feedback/pose",
+    "arm_token": "left",
+    "pose_value_shape": [
+      1042,
+      7
+    ],
+    "pose_value_dtype": "[('value', '<f4', (7,)), ('timestamp', '<f8')]",
+    "pose_group_attrs": {},
+    "pose_dataset_attrs": {},
+    "stats": {
+      "n_frames_total": 200,
+      "n_frames_scanned": 200,
+      "first_xyz": [
+        0.050615400075912476,
+        0.9162876605987549,
+        -0.2216455042362213
+      ],
+      "first_quat4": [
+        0.8484364748001099,
+        -0.44483888149261475,
+        0.06325621902942657,
+        -0.2797722816467285
+      ],
+      "quat_norm_mean": 1.0000000006476382,
+      "quat_norm_std": 1.6181330796380437e-08,
+      "quat_norm_min": 0.99999997004646,
+      "quat_norm_max": 1.0000000319752158,
+      "median_abs_delta_q_per_step": 0.0028579533100128174,
+      "median_abs_delta_xyz_per_step_mm": 1.117810606956482,
+      "per_component": [
+        {
+          "slot": 0,
+          "min": 0.8153301477432251,
+          "max": 0.9410558342933655,
+          "mean": 0.882813709974289,
+          "std": 0.03905785310094607,
+          "abs_mean": 0.882813709974289
+        },
+        {
+          "slot": 1,
+          "min": -0.44487401843070984,
+          "max": 0.08589547127485275,
+          "mean": -0.14184800154995172,
+          "std": 0.20765687767795651,
+          "abs_mean": 0.19255828767782077
+        },
+        {
+          "slot": 2,
+          "min": 0.030837099999189377,
+          "max": 0.35392656922340393,
+          "mean": 0.1656036528944969,
+          "std": 0.11130911078493272,
+          "abs_mean": 0.1656036528944969
+        },
+        {
+          "slot": 3,
+          "min": -0.45337536931037903,
+          "max": -0.2771962285041809,
+          "mean": -0.3354907670617104,
+          "std": 0.05919342630556526,
+          "abs_mean": 0.3354907670617104
+        }
+      ]
+    },
+    "slot_pattern": {
+      "slot_with_max_abs": 3,
+      "slot_with_min_abs": 5,
+      "max_abs_value": 0.882813709974289,
+      "min_abs_value": 0.1656036528944969,
+      "pattern": "max@3, min@5"
+    },
+    "cross_check_vs_pass_car": {
+      "max_abs_diff": {
+        "direct": 1.285736881492615,
+        "shift_-1": 0.03918228164672852,
+        "shift_+1": 0.7871774748001099
+      },
+      "layout_blind_angle_deg": {
+        "direct": 102.525884225343,
+        "shift_-1": 6.167090476304566,
+        "shift_+1": 139.4251715925893
+      }
+    },
+    "verdict": {
+      "verdict": "LIKELY_XYZW_PERMUTED_shift_-1",
+      "confidence": "high",
+      "reason": "shift_-1 cyclic shift of pass_car's WXYZ ref is the closest layout-blind match (6.2\u00b0). slot-pattern=max@3, min@5. Conclusion: dataset was permuted at write time."
+    }
+  },
+  {
+    "task": "Flexiv_computer_1_cpu_0513",
+    "episode_path": "/mnt/data/data/ymm/dataset/Flexiv/release/Flexiv_computer_1_cpu_0513/Flexiv\u7cbe\u7ec6\u88c5\u914d-CPU\u9ad8\u7cbe\u5ea6\u653e\u7f6e\u4e0e\u9501\u7d27/worldcode_Flexiv-B_2026-05-06-12-27-05_0",
+    "h5_root_attrs": {},
+    "pose_path": "action/left_eef/feedback/pose",
+    "arm_token": "left",
+    "pose_value_shape": [
+      2101,
+      7
+    ],
+    "pose_value_dtype": "[('value', '<f4', (7,)), ('timestamp', '<f8')]",
+    "pose_group_attrs": {},
+    "pose_dataset_attrs": {},
+    "stats": {
+      "n_frames_total": 200,
+      "n_frames_scanned": 200,
+      "first_xyz": [
+        0.05499384552240372,
+        0.9119240045547485,
+        -0.22465404868125916
+      ],
+      "first_quat4": [
+        0.846886932849884,
+        -0.44938358664512634,
+        0.0678277239203453,
+        -0.27610933780670166
+      ],
+      "quat_norm_mean": 1.0000000017265744,
+      "quat_norm_std": 1.559053758843118e-08,
+      "quat_norm_min": 0.999999962424839,
+      "quat_norm_max": 1.0000000372470699,
+      "median_abs_delta_q_per_step": 0.00023543834686279297,
+      "median_abs_delta_xyz_per_step_mm": 0.32973289489746094,
+      "per_component": [
+        {
+          "slot": 0,
+          "min": -0.6541318893432617,
+          "max": 0.8470360636711121,
+          "mean": 0.656612382531166,
+          "std": 0.3242528465959774,
+          "abs_mean": 0.727375608086586
+        },
+        {
+          "slot": 1,
+          "min": -0.6585837602615356,
+          "max": 0.6687638163566589,
+          "mean": -0.500590014308691,
+          "std": 0.2924343258333814,
+          "abs_mean": 0.5733526442945004
+        },
+        {
+          "slot": 2,
+          "min": -0.1030336543917656,
+          "max": 0.10986328125,
+          "mean": 0.07611426148563623,
+          "std": 0.04300462509489706,
+          "abs_mean": 0.08591525357216596
+        },
+        {
+          "slot": 3,
+          "min": -0.3957696855068207,
+          "max": 0.3881686329841614,
+          "mean": -0.30173183560371397,
+          "std": 0.1700799737925002,
+          "abs_mean": 0.3429486665129662
+        }
+      ]
+    },
+    "slot_pattern": {
+      "slot_with_max_abs": 3,
+      "slot_with_min_abs": 5,
+      "max_abs_value": 0.727375608086586,
+      "min_abs_value": 0.08591525357216596,
+      "pattern": "max@3, min@5"
+    },
+    "cross_check_vs_pass_car": {
+      "max_abs_diff": {
+        "direct": 1.2902815866451265,
+        "shift_-1": 0.03551933780670166,
+        "shift_+1": 0.7856279328498841
+      },
+      "layout_blind_angle_deg": {
+        "direct": 101.72699451826772,
+        "shift_-1": 5.535713808226292,
+        "shift_+1": 139.04851417210014
+      }
+    },
+    "verdict": {
+      "verdict": "LIKELY_XYZW_PERMUTED_shift_-1",
+      "confidence": "high",
+      "reason": "shift_-1 cyclic shift of pass_car's WXYZ ref is the closest layout-blind match (5.5\u00b0). slot-pattern=max@3, min@5. Conclusion: dataset was permuted at write time."
+    }
+  },
+  {
+    "task": "Flexiv_computer_2_ram_0513",
+    "episode_path": "/mnt/data/data/ymm/dataset/Flexiv/release/Flexiv_computer_2_ram_0513/Flexiv\u7cbe\u7ec6\u88c5\u914d-\u5185\u5b58\u6761\u53cc\u81c2\u5bf9\u79f0\u5b89\u88c5/worldcode_Flexiv-B_2026-04-29-15-30-25_0",
+    "h5_root_attrs": {},
+    "pose_path": "action/left_eef/feedback/pose",
+    "arm_token": "left",
+    "pose_value_shape": [
+      1724,
+      7
+    ],
+    "pose_value_dtype": "[('value', '<f4', (7,)), ('timestamp', '<f8')]",
+    "pose_group_attrs": {},
+    "pose_dataset_attrs": {},
+    "stats": {
+      "n_frames_total": 200,
+      "n_frames_scanned": 200,
+      "first_xyz": [
+        0.05499687418341637,
+        0.9119203090667725,
+        -0.2246549129486084
+      ],
+      "first_quat4": [
+        0.846886396408081,
+        -0.4493844211101532,
+        0.06783147901296616,
+        -0.2761085331439972
+      ],
+      "quat_norm_mean": 1.0000000005370375,
+      "quat_norm_std": 1.5429325432412146e-08,
+      "quat_norm_min": 0.9999999649661877,
+      "quat_norm_max": 1.000000034772943,
+      "median_abs_delta_q_per_step": 0.00029778480529785156,
+      "median_abs_delta_xyz_per_step_mm": 0.5684047937393188,
+      "per_component": [
+        {
+          "slot": 0,
+          "min": 0.7521065473556519,
+          "max": 0.8468875885009766,
+          "mean": 0.7998588961362839,
+          "std": 0.03954992471660947,
+          "abs_mean": 0.7998588961362839
+        },
+        {
+          "slot": 1,
+          "min": -0.5714304447174072,
+          "max": -0.4490305185317993,
+          "mean": -0.511638640165329,
+          "std": 0.0521893749070152,
+          "abs_mean": 0.511638640165329
+        },
+        {
+          "slot": 2,
+          "min": 0.006736121140420437,
+          "max": 0.06984352320432663,
+          "mean": 0.03757964553311467,
+          "std": 0.027062104360413824,
+          "abs_mean": 0.03757964553311467
+        },
+        {
+          "slot": 3,
+          "min": -0.3318697512149811,
+          "max": -0.276096910238266,
+          "mean": -0.30254478186368944,
+          "std": 0.02204063414386048,
+          "abs_mean": 0.30254478186368944
+        }
+      ]
+    },
+    "slot_pattern": {
+      "slot_with_max_abs": 3,
+      "slot_with_min_abs": 5,
+      "max_abs_value": 0.7998588961362839,
+      "min_abs_value": 0.03757964553311467,
+      "pattern": "max@3, min@5"
+    },
+    "cross_check_vs_pass_car": {
+      "max_abs_diff": {
+        "direct": 1.2902824211101533,
+        "shift_-1": 0.035518533143997194,
+        "shift_+1": 0.7856273964080811
+      },
+      "layout_blind_angle_deg": {
+        "direct": 101.72664605704809,
+        "shift_-1": 5.535634654875534,
+        "shift_+1": 139.0481527218773
+      }
+    },
+    "verdict": {
+      "verdict": "LIKELY_XYZW_PERMUTED_shift_-1",
+      "confidence": "high",
+      "reason": "shift_-1 cyclic shift of pass_car's WXYZ ref is the closest layout-blind match (5.5\u00b0). slot-pattern=max@3, min@5. Conclusion: dataset was permuted at write time."
+    }
+  },
+  {
+    "task": "Flexiv_pass_car_0429",
+    "episode_path": "/mnt/data/data/ymm/dataset/Flexiv/release/Flexiv_pass_car_0429/Flexiv\u5c0f\u8f66-\u5c0f\u8f66\u901a\u884c/worldcode_Flexiv-A_2026-04-28-14-55-57_0",
+    "h5_root_attrs": {},
+    "pose_path": "action/left_eef/feedback/pose",
+    "arm_token": "left",
+    "pose_value_shape": [
+      3077,
+      7
+    ],
+    "pose_value_dtype": "[('value', '<f4', (7,)), ('timestamp', '<f8')]",
+    "pose_group_attrs": {},
+    "pose_dataset_attrs": {},
+    "stats": {
+      "n_frames_total": 200,
+      "n_frames_scanned": 200,
+      "first_xyz": [
+        0.05061979964375496,
+        0.9162570834159851,
+        -0.22171732783317566
+      ],
+      "first_quat4": [
+        -0.279704213142395,
+        0.8484540581703186,
+        -0.4448446035385132,
+        0.06328170746564865
+      ],
+      "quat_norm_mean": 0.999999998778414,
+      "quat_norm_std": 1.5525416402308097e-08,
+      "quat_norm_min": 0.9999999691531725,
+      "quat_norm_max": 1.0000000309205108,
+      "median_abs_delta_q_per_step": 0.0008935034275054932,
+      "median_abs_delta_xyz_per_step_mm": 1.0390877723693848,
+      "per_component": [
+        {
+          "slot": 0,
+          "min": -0.27973487973213196,
+          "max": -0.21562443673610687,
+          "mean": -0.23914170742034913,
+          "std": 0.021031500386030095,
+          "abs_mean": 0.23914170742034913
+        },
+        {
+          "slot": 1,
+          "min": 0.8480136394500732,
+          "max": 0.8771153092384338,
+          "mean": 0.8634929755330085,
+          "std": 0.010024031556893158,
+          "abs_mean": 0.8634929755330085
+        },
+        {
+          "slot": 2,
+          "min": -0.458889901638031,
+          "max": -0.4197640120983124,
+          "mean": -0.438950687199831,
+          "std": 0.01161294168956152,
+          "abs_mean": 0.438950687199831
+        },
+        {
+          "slot": 3,
+          "min": 0.036750901490449905,
+          "max": 0.08186674863100052,
+          "mean": 0.06111897578462958,
+          "std": 0.010011089254766603,
+          "abs_mean": 0.06111897578462958
+        }
+      ]
+    },
+    "slot_pattern": {
+      "slot_with_max_abs": 4,
+      "slot_with_min_abs": 6,
+      "max_abs_value": 0.8634929755330085,
+      "min_abs_value": 0.06111897578462958,
+      "pattern": "max@4, min@6"
+    },
+    "cross_check_vs_pass_car": {
+      "max_abs_diff": {
+        "direct": 0.03911421314239502,
+        "shift_-1": 1.3293430581703185,
+        "shift_+1": 1.2857426035385133
+      },
+      "layout_blind_angle_deg": {
+        "direct": 6.161363485405636,
+        "shift_-1": 93.42010652433927,
+        "shift_+1": 102.52337101190443
+      }
+    },
+    "verdict": {
+      "verdict": "WXYZ_HIGH_CONF",
+      "confidence": "high",
+      "reason": "first-frame quat as-is is angularly close to pass_car's verified WXYZ home reference: 6.2\u00b0 vs 93.4\u00b0 (shift_-1) / 102.5\u00b0 (shift_+1). slot-pattern=max@4, min@6. Conclusion: same write stack as pass_car, no permute, layout=WXYZ."
+    }
+  },
+  {
+    "task": "Flexiv_phone_packing_0518",
+    "episode_path": "/mnt/data/data/ymm/dataset/Flexiv/release/Flexiv_phone_packing_0518/Flexiv\u6253\u5305\u624b\u673a-\u6253\u5305\u624b\u673a/worldcode_Flexiv-B_2026-05-11-11-16-54_0",
+    "h5_root_attrs": {},
+    "pose_path": "action/left_eef/feedback/pose",
+    "arm_token": "left",
+    "pose_value_shape": [
+      1868,
+      7
+    ],
+    "pose_value_dtype": "[('value', '<f4', (7,)), ('timestamp', '<f8')]",
+    "pose_group_attrs": {},
+    "pose_dataset_attrs": {},
+    "stats": {
+      "n_frames_total": 200,
+      "n_frames_scanned": 200,
+      "first_xyz": [
+        0.05500965565443039,
+        0.9119665026664734,
+        -0.2245548963546753
+      ],
+      "first_quat4": [
+        0.8468616008758545,
+        -0.4493798613548279,
+        0.06781891733407974,
+        -0.2761951684951782
+      ],
+      "quat_norm_mean": 1.0000000012256225,
+      "quat_norm_std": 1.6275565720889912e-08,
+      "quat_norm_min": 0.99999996613816,
+      "quat_norm_max": 1.0000000394444408,
+      "median_abs_delta_q_per_step": 0.0013923943042755127,
+      "median_abs_delta_xyz_per_step_mm": 1.0946691036224365,
+      "per_component": [
+        {
+          "slot": 0,
+          "min": -0.6810694336891174,
+          "max": 0.8468616008758545,
+          "mean": -0.04865074038505554,
+          "std": 0.6356880472764865,
+          "abs_mean": 0.6180271857976913
+        },
+        {
+          "slot": 1,
+          "min": -0.6841660141944885,
+          "max": 0.8781533241271973,
+          "mean": 0.3773353762924671,
+          "std": 0.630040860522342,
+          "abs_mean": 0.7140669773519039
+        },
+        {
+          "slot": 2,
+          "min": -0.08453863114118576,
+          "max": 0.07473868131637573,
+          "mean": -0.0027597290696576237,
+          "std": 0.05334420963951628,
+          "abs_mean": 0.04866351854521781
+        },
+        {
+          "slot": 3,
+          "min": -0.27841848134994507,
+          "max": 0.25666749477386475,
+          "mean": 0.040563372522592546,
+          "std": 0.22293885783891185,
+          "abs_mean": 0.22270802289247513
+        }
+      ]
+    },
+    "slot_pattern": {
+      "slot_with_max_abs": 4,
+      "slot_with_min_abs": 5,
+      "max_abs_value": 0.7140669773519039,
+      "min_abs_value": 0.04866351854521781,
+      "pattern": "max@4, min@5"
+    },
+    "cross_check_vs_pass_car": {
+      "max_abs_diff": {
+        "direct": 1.290277861354828,
+        "shift_-1": 0.035605168495178224,
+        "shift_+1": 0.7856026008758545
+      },
+      "layout_blind_angle_deg": {
+        "direct": 101.72820453915033,
+        "shift_-1": 5.542734748314691,
+        "shift_+1": 139.04466973600387
+      }
+    },
+    "verdict": {
+      "verdict": "LIKELY_XYZW_PERMUTED_shift_-1",
+      "confidence": "high",
+      "reason": "shift_-1 cyclic shift of pass_car's WXYZ ref is the closest layout-blind match (5.5\u00b0). slot-pattern=max@4, min@5. Conclusion: dataset was permuted at write time."
+    }
+  },
+  {
+    "task": "Flexiv_whack_a_mole_0518",
+    "episode_path": "/mnt/data/data/ymm/dataset/Flexiv/release/Flexiv_whack_a_mole_0518/Flexiv\u6253\u5730\u9f20-\u6253\u5730\u9f20/worldcode_Flexiv-B_2026-05-12-18-51-16_0",
+    "h5_root_attrs": {},
+    "pose_path": "action/left_eef/feedback/pose",
+    "arm_token": "left",
+    "pose_value_shape": [
+      824,
+      7
+    ],
+    "pose_value_dtype": "[('value', '<f4', (7,)), ('timestamp', '<f8')]",
+    "pose_group_attrs": {},
+    "pose_dataset_attrs": {},
+    "stats": {
+      "n_frames_total": 200,
+      "n_frames_scanned": 200,
+      "first_xyz": [
+        0.05500268191099167,
+        0.9119168519973755,
+        -0.22465106844902039
+      ],
+      "first_quat4": [
+        0.8468824028968811,
+        -0.4493899643421173,
+        0.0678330734372139,
+        -0.27611133456230164
+      ],
+      "quat_norm_mean": 0.9999999999289085,
+      "quat_norm_std": 1.780554033981081e-08,
+      "quat_norm_min": 0.9999999657356061,
+      "quat_norm_max": 1.0000000375468292,
+      "median_abs_delta_q_per_step": 0.00019761919975280762,
+      "median_abs_delta_xyz_per_step_mm": 0.10950863361358643,
+      "per_component": [
+        {
+          "slot": 0,
+          "min": -0.683573305606842,
+          "max": 0.8468825817108154,
+          "mean": -0.15497939705848693,
+          "std": 0.6086345005648803,
+          "abs_mean": 0.6138344740867615
+        },
+        {
+          "slot": 1,
+          "min": -0.6751663088798523,
+          "max": 0.8194425702095032,
+          "mean": 0.44243735671043394,
+          "std": 0.5851185024057705,
+          "abs_mean": 0.7187497103214264
+        },
+        {
+          "slot": 2,
+          "min": -0.10038997232913971,
+          "max": 0.08449086546897888,
+          "mean": -0.051197360437363386,
+          "std": 0.07371423206370091,
+          "abs_mean": 0.08856154458597303
+        },
+        {
+          "slot": 3,
+          "min": -0.2808668911457062,
+          "max": 0.23998360335826874,
+          "mean": 0.09093370698392392,
+          "std": 0.22606870151908184,
+          "abs_mean": 0.2428847187012434
+        }
+      ]
+    },
+    "slot_pattern": {
+      "slot_with_max_abs": 4,
+      "slot_with_min_abs": 5,
+      "max_abs_value": 0.7187497103214264,
+      "min_abs_value": 0.08856154458597303,
+      "pattern": "max@4, min@5"
+    },
+    "cross_check_vs_pass_car": {
+      "max_abs_diff": {
+        "direct": 1.2902879643421175,
+        "shift_-1": 0.03552133456230164,
+        "shift_+1": 0.7856234028968812
+      },
+      "layout_blind_angle_deg": {
+        "direct": 101.7259598530473,
+        "shift_-1": 5.535424562663133,
+        "shift_+1": 139.04769032915948
+      }
+    },
+    "verdict": {
+      "verdict": "LIKELY_XYZW_PERMUTED_shift_-1",
+      "confidence": "high",
+      "reason": "shift_-1 cyclic shift of pass_car's WXYZ ref is the closest layout-blind match (5.5\u00b0). slot-pattern=max@4, min@5. Conclusion: dataset was permuted at write time."
+    }
+  },
+  {
+    "task": "Flexiv_whack_a_mole_0527",
+    "episode_path": "/mnt/data/data/ymm/dataset/Flexiv/release/Flexiv_whack_a_mole_0527/Flexiv\u6253\u5730\u9f20-\u6253\u5730\u9f20/worldcode_Flexiv-B_2026-05-27-11-13-22_0",
+    "h5_root_attrs": {},
+    "pose_path": "action/left_eef/feedback/pose",
+    "arm_token": "left",
+    "pose_value_shape": [
+      802,
+      7
+    ],
+    "pose_value_dtype": "[('value', '<f4', (7,)), ('timestamp', '<f8')]",
+    "pose_group_attrs": {},
+    "pose_dataset_attrs": {},
+    "stats": {
+      "n_frames_total": 200,
+      "n_frames_scanned": 200,
+      "first_xyz": [
+        0.05501861870288849,
+        0.9119012355804443,
+        -0.22464315593242645
+      ],
+      "first_quat4": [
+        0.846872091293335,
+        -0.4494055211544037,
+        0.06784068048000336,
+        -0.2761157751083374
+      ],
+      "quat_norm_mean": 1.0000000006212528,
+      "quat_norm_std": 1.4945083384502757e-08,
+      "quat_norm_min": 0.9999999703236374,
+      "quat_norm_max": 1.0000000290563242,
+      "median_abs_delta_q_per_step": 3.516674041748047e-06,
+      "median_abs_delta_xyz_per_step_mm": 0.00414624810218811,
+      "per_component": [
+        {
+          "slot": 0,
+          "min": 0.8467631340026855,
+          "max": 0.8468948006629944,
+          "mean": 0.8468337285518647,
+          "std": 2.32530015438422e-05,
+          "abs_mean": 0.8468337285518647
+        },
+        {
+          "slot": 1,
+          "min": -0.449582576751709,
+          "max": -0.4494055211544037,
+          "mean": -0.4494785349071026,
+          "std": 3.6954003715598324e-05,
+          "abs_mean": 0.4494785349071026
+        },
+        {
+          "slot": 2,
+          "min": 0.06784068048000336,
+          "max": 0.0679662898182869,
+          "mean": 0.06789510976523161,
+          "std": 2.6944265377289576e-05,
+          "abs_mean": 0.06789510976523161
+        },
+        {
+          "slot": 3,
+          "min": -0.2762601673603058,
+          "max": -0.27598249912261963,
+          "mean": -0.27610131293535234,
+          "std": 2.2809328825105465e-05,
+          "abs_mean": 0.27610131293535234
+        }
+      ]
+    },
+    "slot_pattern": {
+      "slot_with_max_abs": 3,
+      "slot_with_min_abs": 5,
+      "max_abs_value": 0.8468337285518647,
+      "min_abs_value": 0.06789510976523161,
+      "pattern": "max@3, min@5"
+    },
+    "cross_check_vs_pass_car": {
+      "max_abs_diff": {
+        "direct": 1.2903035211544038,
+        "shift_-1": 0.035525775108337404,
+        "shift_+1": 0.785613091293335
+      },
+      "layout_blind_angle_deg": {
+        "direct": 101.72381311473238,
+        "shift_-1": 5.534608669879972,
+        "shift_+1": 139.04626614683622
+      }
+    },
+    "verdict": {
+      "verdict": "LIKELY_XYZW_PERMUTED_shift_-1",
+      "confidence": "high",
+      "reason": "shift_-1 cyclic shift of pass_car's WXYZ ref is the closest layout-blind match (5.5\u00b0). slot-pattern=max@3, min@5. Conclusion: dataset was permuted at write time."
+    }
+  },
+  {
+    "task": "ossutil_output",
+    "error": "no dataset.hdf5 found anywhere under task dir"
+  }
+]
